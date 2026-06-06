@@ -306,7 +306,13 @@ export default class ProgressionEstimationService {
         }
         this.profilingStats.getNextItemTime += os.clock() - startTime;
         this.profilingStats.getNextItemCount++;
-        return { revenue, priceLabel: nextPrice?.toString() ?? "N/A", item: nextItem, timeToObtain, limitingCurrency };
+        return {
+            revenue,
+            priceLabel: nextPrice?.toString() ?? "N/A",
+            item: nextItem,
+            timeToObtain,
+            limitingCurrency,
+        };
     }
 
     /**
@@ -857,10 +863,19 @@ export default class ProgressionEstimationService {
             limitingCurrencyCounts: Record<string, number>;
         };
         progression: ProgressionReportEntry[];
-        topLongest: Array<{ rank: number; itemName: string; timeLabel: string; timeSeconds: number }>;
+        topLongest: Array<{
+            rank: number;
+            itemName: string;
+            timeLabel: string;
+            timeSeconds: number;
+        }>;
         profiling: ProfilingReport;
         upgradesSimulated: Array<{ id: string; amount: number }>;
-        resetLayersSimulated: Array<{ id: string; rewardLabel: string; rewardBreakdown: SerializedCurrencyAmount[] }>;
+        resetLayersSimulated: Array<{
+            id: string;
+            rewardLabel: string;
+            rewardBreakdown: SerializedCurrencyAmount[];
+        }>;
     }): Record<string, unknown> {
         const compactSummary = {
             ti: report.summary.totalItems,

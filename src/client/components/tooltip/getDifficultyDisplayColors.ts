@@ -1,6 +1,9 @@
 import Difficulty from "@rbxts/ejt";
 
-export default function getDifficultyDisplayColors(difficulty?: Difficulty): { background: Color3; text: Color3 } {
+export default function getDifficultyDisplayColors(difficulty?: Difficulty): {
+    background: Color3;
+    text: Color3;
+} {
     const color = difficulty?.color ?? new Color3();
 
     const background = new Color3(

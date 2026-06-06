@@ -17,7 +17,9 @@ export default function DropletSurgeManager() {
             light.Parent = droplet;
 
             // Fade back to original color over time
-            TweenService.Create(light, new TweenInfo(2), { Brightness: 0 }).Play();
+            TweenService.Create(light, new TweenInfo(2), {
+                Brightness: 0,
+            }).Play();
             Debris.AddItem(light, 2);
         });
 

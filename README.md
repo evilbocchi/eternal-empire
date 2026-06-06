@@ -13,13 +13,14 @@ Build your money-making empire. Uncover the world of Obbysia.
 
 ## Status
 
-This project is under constant development, and will not stop until the completion of the [EJT Difficulty Chart](https://jtohs-joke-towers.fandom.com/wiki/Eternal_Joke_Towers_(EJT)_Wiki) (at an arbitrary point).
+This project is under constant development, and will not stop until the completion of the [EJT Difficulty Chart](<https://jtohs-joke-towers.fandom.com/wiki/Eternal_Joke_Towers_(EJT)_Wiki>) (at an arbitrary point).
 
 However, note that we strive to maintain things in a stable state. As such, changes in this repository may not impact the main distribution of this project on Roblox immediately.
 
 ## Setup
 
 ### Prerequisities
+
 - [Node.js 22+](https://nodejs.org/en/download)
 - [UI Labs (recommended)](https://ui-labs.luau.page/docs/installation)
 - React DevTools 4.9.0 (optional): `npm i -g react-devtools@4.9.0`
@@ -33,12 +34,14 @@ To set up the development environment for Eternal Empire, follow these steps:
 1. Download the development place file from the [sandbox repository](https://github.com/evilbocchi/eternal-empire-sandbox). You will need this to test the game in Roblox Studio.
 
 2. Clone the repository:
+
     ```sh
     git clone https://github.com/evilbocchi/eternal-empire.git
     cd eternal-empire
     ```
 
 3. Install dependencies:
+
     ```sh
     npm install
     ```
@@ -48,6 +51,7 @@ To set up the development environment for Eternal Empire, follow these steps:
     - However, you will need to install the Roblox Studio plugin for Rojo yourself. To do so, either try running `npx rojo plugin install` or follow the [official documentation](https://rojo.space/docs/v7/getting-started/installation/).
 
 5. Run the environment:
+
     ```sh
     npm run dev
     ```
@@ -74,10 +78,12 @@ We warmly welcome contributions to improve Eternal Empire! To contribute:
 This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License.
 
 **You are free to:**
+
 - Use, share, and modify the code for personal or non-commercial purposes.
 - Create and distribute mods or derivative works, as long as they are not for commercial use.
 
 **You may not:**
+
 - Use any part of this project or its derivatives for commercial purposes.
 
 See the [LICENSE](LICENSE) file for full details, and thank you for respecting the work that was put into this project.

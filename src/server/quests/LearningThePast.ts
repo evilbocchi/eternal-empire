@@ -66,7 +66,9 @@ const unlockWall = () => {
     TweenService.Create(keyModel.PrimaryPart!, tweenInfo, {
         Orientation: keyModel.PrimaryPart!.Orientation.add(inc),
     }).Play();
-    TweenService.Create(keyhole, tweenInfo, { Orientation: keyhole.Orientation.sub(inc) }).Play();
+    TweenService.Create(keyhole, tweenInfo, {
+        Orientation: keyhole.Orientation.sub(inc),
+    }).Play();
     task.delay(1, () => {
         keyModel.Destroy();
         keyhole.Destroy();

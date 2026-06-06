@@ -118,7 +118,10 @@ export = new Item(script.Name)
             clone.Position = shadow.Position;
             clone.Size = shadowSize;
             clone.Transparency = 0.5;
-            TweenService.Create(clone, tweenInfo, { Transparency: 1, Size: newSize }).Play();
+            TweenService.Create(clone, tweenInfo, {
+                Transparency: 1,
+                Size: newSize,
+            }).Play();
             clone.Parent = Workspace;
             task.wait(1);
             partCache.ReturnPart(clone);

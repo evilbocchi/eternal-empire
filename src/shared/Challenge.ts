@@ -211,7 +211,9 @@ export class Challenge {
                 target.add(new Vector3(math.random(-50, 50), 300, math.random(-50, 50))),
                 target,
             );
-            TweenService.Create(meteor, cwMeteorTween, { Position: target }).Play();
+            TweenService.Create(meteor, cwMeteorTween, {
+                Position: target,
+            }).Play();
             meteor.Parent = Workspace;
             task.delay(0.5, () => {
                 meteor.Transparency = 1;

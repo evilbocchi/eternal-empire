@@ -22,10 +22,7 @@
                 "$tsc-watch",
                 {
                     "owner": "typescript",
-                    "fileLocation": [
-                        "relative",
-                        "${workspaceFolder}"
-                    ],
+                    "fileLocation": ["relative", "${workspaceFolder}"],
                     "pattern": {
                         "regexp": "^(.+\\.ts):(\\d+):(\\d+) - error TS roblox-ts: (.*)$",
                         "file": 1,

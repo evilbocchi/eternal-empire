@@ -29,7 +29,9 @@ export = new Item(script.Name)
             if (Boostable.hasBoost(modelInfo, key)) return;
             Boostable.addBoost(modelInfo, key, {
                 ignoresLimitations: true,
-                generatorCompound: { mul: new CurrencyBundle().set("Funds", 3).set("Power", 3) },
+                generatorCompound: {
+                    mul: new CurrencyBundle().set("Funds", 3).set("Power", 3),
+                },
             });
         } else {
             Boostable.removeBoost(modelInfo, key);

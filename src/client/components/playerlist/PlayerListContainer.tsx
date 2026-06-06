@@ -120,7 +120,11 @@ function computePanelLayout(): PanelLayout {
 }
 
 export default function PlayerListContainer() {
-    const { visible, setVisible } = useDocument({ id: "PlayerList", defaultVisible: false, priority: -1 });
+    const { visible, setVisible } = useDocument({
+        id: "PlayerList",
+        defaultVisible: false,
+        priority: -1,
+    });
     const [players, setPlayers] = useState<PlayerRosterEntry[]>(() => buildRoster());
     const [rendered, setRendered] = useState(visible);
     const [progress, setProgress] = React.useBinding(visible ? 1 : 0);

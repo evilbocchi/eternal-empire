@@ -281,7 +281,10 @@ function ListingCard({
                 MouseEnter: () => {
                     const item = Items.getItem(listing.uniqueItem.baseItemId);
                     if (item === undefined) return;
-                    TooltipManager.showTooltip({ item, uniqueInstance: listing.uniqueItem });
+                    TooltipManager.showTooltip({
+                        item,
+                        uniqueInstance: listing.uniqueItem,
+                    });
                 },
                 MouseLeave: () => {
                     TooltipManager.hideTooltip();

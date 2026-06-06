@@ -144,7 +144,12 @@ export function requestToolExecution(name, args = {}, options = {}) {
             reject(new Error(`Tool request timed out after ${timeoutMs} ms`));
         }, timeoutMs);
 
-        state.pendingRequests.set(requestId, { resolve, reject, timeout, onProgress });
+        state.pendingRequests.set(requestId, {
+            resolve,
+            reject,
+            timeout,
+            onProgress,
+        });
 
         try {
             sendEvent("call-tool", {

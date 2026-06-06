@@ -191,7 +191,10 @@ export class LeaderboardService implements OnStart {
                     .GetSortedAsync(false, 100)
                     .GetCurrentPage()
                     .map((value) => {
-                        return { key: getNameFromUserId(tonumber(value.key) ?? 0), value: value.value };
+                        return {
+                            key: getNameFromUserId(tonumber(value.key) ?? 0),
+                            value: value.value,
+                        };
                     }),
             ),
         );

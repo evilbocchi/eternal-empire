@@ -18,7 +18,10 @@ type TabType = "Browse" | "MyListings" | "CreateListing";
 
 // Main Marketplace Window Component
 export default function MarketplaceWindow() {
-    const { id, visible, openDocument, closeDocument } = useSingleDocument({ id: "Marketplace", priority: 1 });
+    const { id, visible, openDocument, closeDocument } = useSingleDocument({
+        id: "Marketplace",
+        priority: 1,
+    });
     const [activeTab, setActiveTab] = useState<TabType>("Browse");
     const [listings, setListings] = useState<MarketplaceListing[]>([]);
     const myListings = useProperty(Packets.empireActiveListings);

@@ -490,7 +490,9 @@ export default class NPC extends Identifiable {
             }
         });
 
-        const tween = TweenService.Create(rootPart, new TweenInfo(1), { CFrame: destination });
+        const tween = TweenService.Create(rootPart, new TweenInfo(1), {
+            CFrame: destination,
+        });
         let toCall = false;
 
         /**

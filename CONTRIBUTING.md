@@ -21,17 +21,18 @@ See the [README](README.md) for local setup instructions.
 
 ## Pull Request Process
 
-1. **Push your branch**  
-   ```sh
-   git push origin feature/your-feature-name
-   ```
+1. **Push your branch**
 
-2. **Open a Pull Request**  
-   - Go to your fork on GitHub and click "Compare & pull request".
-   - Fill in the PR template and describe your changes.
+    ```sh
+    git push origin feature/your-feature-name
+    ```
 
-3. **Address feedback**  
-   - Respond to review comments and make necessary changes.
+2. **Open a Pull Request**
+    - Go to your fork on GitHub and click "Compare & pull request".
+    - Fill in the PR template and describe your changes.
+
+3. **Address feedback**
+    - Respond to review comments and make necessary changes.
 
 ## Communication
 

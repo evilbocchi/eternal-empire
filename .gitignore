@@ -13,3 +13,4 @@ local.rbxl
 upstream.rbxl
 *.lock
 *.log
+!bun.lock

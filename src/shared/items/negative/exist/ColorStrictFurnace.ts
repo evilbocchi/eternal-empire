@@ -19,8 +19,12 @@ declare global {
 const SERVER_COLOR_INFO: Record<number, () => { add?: CurrencyBundle; mul: CurrencyBundle }> = {
     1: () => ({ mul: new CurrencyBundle().set("Funds", 4500).set("Power", 6) }),
     2: () => ({ mul: new CurrencyBundle().set("Funds", 2500).set("Power", 6) }),
-    3: () => ({ mul: new CurrencyBundle().set("Funds", 2500).set("Power", 10) }),
-    4: () => ({ mul: new CurrencyBundle().set("Funds", 4500).set("Power", 10) }),
+    3: () => ({
+        mul: new CurrencyBundle().set("Funds", 2500).set("Power", 10),
+    }),
+    4: () => ({
+        mul: new CurrencyBundle().set("Funds", 4500).set("Power", 10),
+    }),
     5: () => ({
         add: new CurrencyBundle().set("Purifier Clicks", 1),
         mul: new CurrencyBundle().set("Funds", 3500).set("Power", 8).set("Purifier Clicks", 2),
@@ -32,7 +36,10 @@ const CLIENT_COLOR_INFO: Record<number, { name: string; boostLabel: string }> = 
     2: { name: "Blue", boostLabel: "x2500 Funds, x6 Power" },
     3: { name: "Orange", boostLabel: "x2500 Funds, x10 Power" },
     4: { name: "Red", boostLabel: "x4500 Funds, x10 Power" },
-    5: { name: "Violet", boostLabel: "x3500 Funds, x8 Power, +1 then x2 Purifier Clicks" },
+    5: {
+        name: "Violet",
+        boostLabel: "x3500 Funds, x8 Power, +1 then x2 Purifier Clicks",
+    },
 };
 
 interface ColorState {

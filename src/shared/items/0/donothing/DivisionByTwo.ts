@@ -100,7 +100,10 @@ export = new Item(script.Name)
                             }
                         } else {
                             // First time seeing this character on the button
-                            characterStillness.set(character, { position: currentPosition, timestamp: currentTime });
+                            characterStillness.set(character, {
+                                position: currentPosition,
+                                timestamp: currentTime,
+                            });
                         }
                     } else {
                         // Character is not on the button, remove from tracking

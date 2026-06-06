@@ -20,7 +20,9 @@ export = new Item(script.Name)
     .onLoad((model) => {
         const drop = model.WaitForChild("Drop");
         const instanceInfo = getAllInstanceInfo(drop);
-        Boostable.addBoost(instanceInfo, "HandCrank", { ignoresLimitations: false });
+        Boostable.addBoost(instanceInfo, "HandCrank", {
+            ignoresLimitations: false,
+        });
     })
 
     .trait(Dropper)

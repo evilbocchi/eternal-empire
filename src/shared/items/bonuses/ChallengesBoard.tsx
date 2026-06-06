@@ -35,7 +35,10 @@ function ChallengeOption({ challenge, currentLevel }: { challenge: Challenge; cu
         if (confirmationState.showConfirmation && currentTime - confirmationState.lastClickTime < 3) {
             // Send challenge start packet to server
             const success = Packets.startChallenge.toServer(challenge.id);
-            setConfirmationState({ showConfirmation: false, lastClickTime: currentTime });
+            setConfirmationState({
+                showConfirmation: false,
+                lastClickTime: currentTime,
+            });
             if (success) {
                 playSound("MagicCast.mp3");
             } else {
@@ -43,7 +46,10 @@ function ChallengeOption({ challenge, currentLevel }: { challenge: Challenge; cu
             }
         } else {
             // Show confirmation
-            setConfirmationState({ showConfirmation: true, lastClickTime: currentTime });
+            setConfirmationState({
+                showConfirmation: true,
+                lastClickTime: currentTime,
+            });
         }
     };
 
@@ -80,7 +86,9 @@ function ChallengeOption({ challenge, currentLevel }: { challenge: Challenge; cu
                 ref={(instance) => {
                     if (!instance) return;
                     const targetTransparency = isHovered ? 0.4 : 0.6;
-                    TweenService.Create(instance, new TweenInfo(0.3), { ImageTransparency: targetTransparency }).Play();
+                    TweenService.Create(instance, new TweenInfo(0.3), {
+                        ImageTransparency: targetTransparency,
+                    }).Play();
                 }}
                 AnchorPoint={new Vector2(0, 1)}
                 BackgroundTransparency={1}
@@ -179,7 +187,9 @@ function ChallengeOption({ challenge, currentLevel }: { challenge: Challenge; cu
                 <imagelabel
                     ref={(instance) => {
                         if (!instance) return;
-                        TweenService.Create(instance, new TweenInfo(0.2), { Rotation: isExpanded ? 180 : 0 }).Play();
+                        TweenService.Create(instance, new TweenInfo(0.2), {
+                            Rotation: isExpanded ? 180 : 0,
+                        }).Play();
                     }}
                     BackgroundTransparency={1}
                     Position={new UDim2(0.85, 0, 0.1, 0)}
@@ -200,7 +210,10 @@ function ChallengeOption({ challenge, currentLevel }: { challenge: Challenge; cu
                                     TweenService.Create(
                                         descendant,
                                         new TweenInfo(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-                                        { TextTransparency: 0, TextStrokeTransparency: 0 },
+                                        {
+                                            TextTransparency: 0,
+                                            TextStrokeTransparency: 0,
+                                        },
                                     ).Play();
                                     descendant.GetChildren().forEach((child) => {
                                         if (child.IsA("UIStroke")) {
@@ -215,7 +228,10 @@ function ChallengeOption({ challenge, currentLevel }: { challenge: Challenge; cu
                                     TweenService.Create(
                                         descendant,
                                         new TweenInfo(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-                                        { BackgroundTransparency: 0, TextTransparency: 0 },
+                                        {
+                                            BackgroundTransparency: 0,
+                                            TextTransparency: 0,
+                                        },
                                     ).Play();
                                     descendant.GetChildren().forEach((child) => {
                                         if (child.IsA("UIStroke")) {

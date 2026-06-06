@@ -6,26 +6,11 @@
         "typedoc-plugin-extras",
         "typedoc-plugin-rename-defaults"
     ],
-    "projectDocuments": [
-        "docs/*.md"
-    ],
+    "projectDocuments": ["docs/*.md"],
     "placeInternalsInOwningModule": true,
-    "highlightLanguages": [
-        "lua",
-        "luau",
-        "typescript",
-        "tsx",
-        "jsx",
-        "sh"
-    ],
-    "entryPoints": [
-        "src"
-    ],
-    "exclude": [
-        "**/node_modules/**",
-        "src/server/quests/**/*",
-        "src/shared/items/**/*",
-    ],
+    "highlightLanguages": ["lua", "luau", "typescript", "tsx", "jsx", "sh"],
+    "entryPoints": ["src"],
+    "exclude": ["**/node_modules/**", "src/server/quests/**/*", "src/shared/items/**/*"],
     "out": "./docsout",
     "skipErrorChecking": true,
     "excludeExternals": true,
@@ -65,9 +50,9 @@
     ],
 
     "favicon": "assets/brand/Cover.png",
-    
+
     "customTitle": "eternal empire",
     "customDescription": "Build your money-making empire. Uncover the world of Obbysia.",
     "entryPointStrategy": "expand",
-    "themeColor": "#E8DDE1",
+    "themeColor": "#E8DDE1"
 }

@@ -181,7 +181,11 @@ function buildPriceOptions(item: Item, price: CurrencyBundle | undefined): Price
         for (const candidate of Items.sortedItems) {
             const requiredAmount = requiredItems.get(candidate.id);
             if (requiredAmount === undefined) continue;
-            options.push({ kind: "item", item: candidate, amount: requiredAmount });
+            options.push({
+                kind: "item",
+                item: candidate,
+                amount: requiredAmount,
+            });
         }
     }
 

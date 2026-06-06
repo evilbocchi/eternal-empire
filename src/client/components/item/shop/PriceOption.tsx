@@ -141,16 +141,26 @@ export function WrappingPriceOptions({
         return currency ? displayBalanceCurrency(currency, amount as OnoeNum) : `${amount} ${item?.name}`;
     };
 
-    const sortedInfos = new Array<{ text: string; currency?: Currency; item?: Item }>();
+    const sortedInfos = new Array<{
+        text: string;
+        currency?: Currency;
+        item?: Item;
+    }>();
     for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
         const amount = price.amountPerCurrency.get(currency);
         if (amount === undefined) continue;
-        sortedInfos.push({ text: getText(currency, undefined, amount), currency });
+        sortedInfos.push({
+            text: getText(currency, undefined, amount),
+            currency,
+        });
     }
     for (const requiredItem of Items.sortedItems) {
         const amount = requiredItems.get(requiredItem.id);
         if (amount === undefined) continue;
-        sortedInfos.push({ text: getText(undefined, requiredItem, amount), item: requiredItem });
+        sortedInfos.push({
+            text: getText(undefined, requiredItem, amount),
+            item: requiredItem,
+        });
     }
 
     // Account for the button's left and right padding

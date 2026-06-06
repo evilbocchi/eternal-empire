@@ -22,7 +22,10 @@ import Packets from "shared/Packets";
  * Main shop window component with integrated filtering
  */
 export default function ShopGui() {
-    const [{ shop, adornee }, setShopInfo] = useState<{ shop?: Shop; adornee?: Part }>({});
+    const [{ shop, adornee }, setShopInfo] = useState<{
+        shop?: Shop;
+        adornee?: Part;
+    }>({});
     const { searchQuery, props: filterProps } = useBasicInventoryFilter();
     const [hideMaxedItems, setHideMaxedItems] = useState(Packets.settings.get().HideMaxedItems);
     const [focusShopCamera, setFocusShopCamera] = useState(Packets.settings.get().FocusShopCamera === true);
@@ -64,7 +67,11 @@ export default function ShopGui() {
             if (shop === undefined) return;
             const shopGuiPart = model.FindFirstChild("ShopGuiPart") as Part;
             if (shopGuiPart === undefined) return;
-            candidates.set(hitbox, { guiPart: shopGuiPart, shop, placementId: model.Name });
+            candidates.set(hitbox, {
+                guiPart: shopGuiPart,
+                shop,
+                placementId: model.Name,
+            });
             ShopManager.hideShopGuiPart(shopGuiPart);
         };
         for (const hitbox of CollectionService.GetTagged("Shop")) {

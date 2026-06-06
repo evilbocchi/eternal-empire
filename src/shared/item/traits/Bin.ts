@@ -87,7 +87,9 @@ export default class Bin extends Operative {
                 CFrame: unclickedCFrame.mul(new CFrame(0, 0, 0.5)),
             }).Play();
             task.wait(0.2);
-            TweenService.Create(clickPart, new TweenInfo(0.6), { CFrame: unclickedCFrame }).Play();
+            TweenService.Create(clickPart, new TweenInfo(0.6), {
+                CFrame: unclickedCFrame,
+            }).Play();
         });
     }
 

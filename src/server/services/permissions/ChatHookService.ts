@@ -102,7 +102,10 @@ export default class ChatHookService implements OnStart, OnPlayerAdded {
         if (!IS_EDIT) {
             const connection = MessagingService.SubscribeAsync("GlobalChat", (message) => {
                 if (this.dataService.empireData.globalChat !== true) return;
-                const data = message.Data as { player: number; message: string };
+                const data = message.Data as {
+                    player: number;
+                    message: string;
+                };
                 if (this.dataService.empireData.blocking.has(data.player)) return;
                 for (const player of Players.GetPlayers()) {
                     if (player.UserId === data.player) {

@@ -104,7 +104,11 @@ function currenciesToString(
     inverse: boolean,
 ) {
     let hasAnyValues = false;
-    const entries = new Array<{ name: Currency; details: CurrencyDetails; amount: OnoeNum }>();
+    const entries = new Array<{
+        name: Currency;
+        details: CurrencyDetails;
+        amount: OnoeNum;
+    }>();
 
     for (const [name, details] of CurrencyBundle.SORTED_DETAILS) {
         if (details.page === CURRENCY_CATEGORIES.Internal) continue;

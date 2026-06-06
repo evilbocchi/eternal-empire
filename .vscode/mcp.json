@@ -3,9 +3,7 @@
     "servers": {
         "eemcp": {
             "command": "node",
-            "args": [
-                "./plugin/mcp/index.js"
-            ]
+            "args": ["./plugin/mcp/index.js"]
         }
     }
 }

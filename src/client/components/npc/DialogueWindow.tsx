@@ -41,7 +41,10 @@ interface DialogueData {
  * @param name The NPC's name
  * @returns Object containing backgroundColor and strokeColor
  */
-function computeDialogueColors(name?: string): { backgroundColor: Color3; strokeColor: Color3 } {
+function computeDialogueColors(name?: string): {
+    backgroundColor: Color3;
+    strokeColor: Color3;
+} {
     const baseColor =
         name === undefined ? Color3.fromRGB(165, 165, 165) : ComputeNameColor(name).Lerp(new Color3(), 0.3);
 
@@ -64,7 +67,10 @@ function getTextSound(model?: Model): Sound | undefined {
 let currentText = "";
 
 export default function DialogueWindow() {
-    const { visible, setVisible } = useDocument({ id: "Dialogue", priority: -1 });
+    const { visible, setVisible } = useDocument({
+        id: "Dialogue",
+        priority: -1,
+    });
     const [dialogueData, setDialogueData] = useState<DialogueData>();
     const frameRef = useRef<TextButton>();
     const textLabelRef = useRef<TextLabel>();

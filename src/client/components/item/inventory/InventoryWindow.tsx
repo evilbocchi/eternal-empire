@@ -122,7 +122,9 @@ const NON_GEAR_ITEMS_SET = new Set(NON_GEAR_ITEMS);
  * Main inventory window component following the QuestWindow pattern
  */
 export default function InventoryWindow() {
-    const { id, visible, closeDocument } = useSingleDocument({ id: "Inventory" });
+    const { id, visible, closeDocument } = useSingleDocument({
+        id: "Inventory",
+    });
     const { searchQuery, props: filterProps } = useBasicInventoryFilter();
     const [cellSize, setCellSize] = useState(new UDim2(0, 65, 0, 65));
     const cellSizeRef = useRef(cellSize);
@@ -278,7 +280,11 @@ export default function InventoryWindow() {
                 data.uuid = bestInstance;
             }
         }
-        return { dataPerItem, hasOwnedItems: ownsAnyItems, hasFilteredItems: anyFilteredVisible };
+        return {
+            dataPerItem,
+            hasOwnedItems: ownsAnyItems,
+            hasFilteredItems: anyFilteredVisible,
+        };
     }, [inventory, uniqueInstances, researching, challengeItemBonuses, searchQuery, filterProps.traitFilters]);
 
     useEffect(() => {

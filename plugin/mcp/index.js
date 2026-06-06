@@ -177,7 +177,10 @@ app.post("/mcp/call-tool", async (req, res) => {
     }
 
     try {
-        const result = await executeMcpTool(name, args, { logger, logPrefix: "[MCP HTTP]" });
+        const result = await executeMcpTool(name, args, {
+            logger,
+            logPrefix: "[MCP HTTP]",
+        });
         return res.json({ success: true, result });
     } catch (error) {
         if (error instanceof McpError) {

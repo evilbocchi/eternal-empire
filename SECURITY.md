@@ -6,7 +6,7 @@ If you find a security issue, please **DO NOT** open a public issue or drop an e
 
 - DM `antivivi` on Discord at `@antivivi` or through the [server](https://discord.gg/haPBmCSvXt) (fastest)
 - Email us at [unrealworks@mail.com](mailto:unrealworks@mail.com)
-- 
+-
 
 We're chill and will give you credit if you find something major.
 

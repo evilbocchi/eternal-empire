@@ -42,7 +42,11 @@ export default function useHotkeyWithTooltip({
     });
 
     // Get tooltip props
-    const tooltipProps = useTooltipProps({ data: { message: label }, onEnter, onLeave });
+    const tooltipProps = useTooltipProps({
+        data: { message: label },
+        onEnter,
+        onLeave,
+    });
 
     // Return both the action handler and tooltip props
     const handleClick = useCallback(() => {

@@ -586,7 +586,9 @@ function CelebrationParticle({ angle, delay }: { angle: number; delay: number })
 
         return () => {
             if (particle.Parent) {
-                TweenService.Create(particle, new TweenInfo(0.1), { ImageTransparency: 1 }).Play();
+                TweenService.Create(particle, new TweenInfo(0.1), {
+                    ImageTransparency: 1,
+                }).Play();
             }
         };
     }, [angle, delay]);

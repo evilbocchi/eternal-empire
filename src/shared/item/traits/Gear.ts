@@ -1,5 +1,3 @@
-import type CurrencyService from "server/services/data/CurrencyService";
-import type ItemService from "server/services/item/ItemService";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
 
@@ -7,10 +5,8 @@ declare global {
     interface ItemTraits {
         Gear: Gear;
     }
-    type GearType = (typeof GEAR_TYPES)[number];
+    type GearType = "Sword" | "Pickaxe" | "Axe" | "Scythe" | "Rod" | "None";
 }
-
-const GEAR_TYPES = ["Sword", "Pickaxe", "Axe", "Scythe", "Rod", "None"] as const;
 
 export interface GearUseContext {
     player: Player;

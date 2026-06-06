@@ -25,7 +25,10 @@ export = CreateReactStory(
         },
     },
     (props) => {
-        const [lootData, setLootData] = useState<{ loot: Array<LootInfo>; visible: boolean }>({
+        const [lootData, setLootData] = useState<{
+            loot: Array<LootInfo>;
+            visible: boolean;
+        }>({
             loot: [],
             visible: false,
         });
@@ -40,7 +43,10 @@ export = CreateReactStory(
                 loot.push({ id: "Grass", amount: props.controls.grassAmount });
             }
             if (props.controls.includeStone) {
-                loot.push({ id: "ExcavationStone", amount: props.controls.stoneAmount });
+                loot.push({
+                    id: "ExcavationStone",
+                    amount: props.controls.stoneAmount,
+                });
             }
             if (props.controls.includeGem) {
                 loot.push({ id: "WhiteGem", amount: props.controls.gemAmount });

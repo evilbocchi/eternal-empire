@@ -9,6 +9,7 @@ title: Introduction
 ## What is Eternal Empire?
 
 Eternal Empire challenges players to:
+
 - **Build and expand** their empires using a wide variety of items, tools, and upgraders.
 - **Interact with NPCs** who provide quests, lore, and unique upgrades.
 - **Progress through difficulties** inspired by the EJT Difficulty Chart, unlocking new areas and mechanics as they advance.
@@ -19,6 +20,7 @@ The game is under active development, with frequent updates, new content, and on
 ## Project Structure
 
 Eternal Empire is built with TypeScript and designed for modularity and extensibility:
+
 - **Items, NPCs, and upgrades** are organized by type and category in the `src/shared/items`, `src/shared/npcs`, and `src/shared/upgrades` folders.
 - **Each file** typically exports a single object or class instance, using method chaining for configuration (e.g., `.setName()`, `.setDescription()`, `.setDifficulty()`).
 - **Custom types and classes** such as `Item`, `NPC`, `CurrencyBundle`, and `Difficulty` provide a robust foundation for gameplay systems.

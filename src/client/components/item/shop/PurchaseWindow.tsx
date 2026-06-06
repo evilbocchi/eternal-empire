@@ -46,7 +46,10 @@ export default function PurchaseWindow() {
     const itemSlotContainerRef = useRef<Frame>();
     const itemSlotHandleRef = useRef<InventorySlotHandle>();
     const { id, visible, openDocument } = useSingleDocument({ id: "Purchase" });
-    const [{ bought, price }, setBoughtData] = useState({ bought: 0, price: new CurrencyBundle() });
+    const [{ bought, price }, setBoughtData] = useState({
+        bought: 0,
+        price: new CurrencyBundle(),
+    });
     const [unaffordableLabel, setUnaffordableLabel] = useState("UNAFFORDABLE");
     const [affordablePerCurrency, setAffordablePerCurrency] = useState(new Map<Currency, boolean>());
     const [affordablePerItemId, setAffordablePerItemId] = useState(new Map<string, boolean>());
@@ -482,7 +485,9 @@ export default function PurchaseWindow() {
                                                 .append(requiredItem.name)
                                                 .append("</font>");
                                         }
-                                        TooltipManager.showTooltip({ message: builder.toString() });
+                                        TooltipManager.showTooltip({
+                                            message: builder.toString(),
+                                        });
                                     },
                                     MouseLeave: () => {
                                         TooltipManager.hideTooltip();

@@ -88,7 +88,9 @@ export default class Nanobot extends ItemTrait {
     private readonly rng = new Random();
 
     private static readonly orbPacket = perItemPacket(
-        packet<(placementId: string, event: NanobotOrbEvent) => void>({ isUnreliable: true }),
+        packet<(placementId: string, event: NanobotOrbEvent) => void>({
+            isUnreliable: true,
+        }),
     );
 
     private static readonly clientEntries = new Map<Model, NanobotClientEntry>();
@@ -271,7 +273,10 @@ export default class Nanobot extends ItemTrait {
                         if (targetModel !== undefined) {
                             const targetAnchor = Nanobot.findAnchor(targetModel);
                             if (targetAnchor !== undefined) {
-                                orb.assignment = { placementId: orb.pendingPlacementId, target: targetAnchor };
+                                orb.assignment = {
+                                    placementId: orb.pendingPlacementId,
+                                    target: targetAnchor,
+                                };
                                 orb.pendingPlacementId = undefined;
                             }
                         }
@@ -358,7 +363,9 @@ export default class Nanobot extends ItemTrait {
                 orb.activeTween = undefined;
             }
             if (orb.part.Parent !== undefined) {
-                TweenService.Create(orb.part, FADE_TWEEN_INFO, { Transparency: 1 }).Play();
+                TweenService.Create(orb.part, FADE_TWEEN_INFO, {
+                    Transparency: 1,
+                }).Play();
                 task.delay(FADE_TWEEN_INFO.Time, () => {
                     if (orb.part.Parent !== undefined) {
                         orb.part.Destroy();
@@ -414,7 +421,10 @@ export default class Nanobot extends ItemTrait {
                     }
                 }
                 const candidates = nanobot.collectNearbyBroken(anchor.Position);
-                const filteredCandidates = new Array<{ placementId: string; target: BasePart }>();
+                const filteredCandidates = new Array<{
+                    placementId: string;
+                    target: BasePart;
+                }>();
                 for (const info of candidates) {
                     if (Nanobot.canTargetPlacement(info.placementId, model)) {
                         filteredCandidates.push(info);
@@ -460,7 +470,10 @@ export default class Nanobot extends ItemTrait {
 
                 if (infoById.size() === 0) return;
 
-                const unclaimed = new Array<{ placementId: string; target: BasePart }>();
+                const unclaimed = new Array<{
+                    placementId: string;
+                    target: BasePart;
+                }>();
                 for (const [, info] of infoById) {
                     unclaimed.push(info);
                 }
@@ -537,7 +550,11 @@ export default class Nanobot extends ItemTrait {
         orb.traveling = true;
         orb.travelDeadline = os.clock() + RETURN_TWEEN_INFO.Time;
 
-        Nanobot.orbPacket.toAllClients(model, { type: "dispatch", index, targetPlacementId: info.placementId });
+        Nanobot.orbPacket.toAllClients(model, {
+            type: "dispatch",
+            index,
+            targetPlacementId: info.placementId,
+        });
         return true;
     }
 
@@ -601,14 +618,19 @@ export default class Nanobot extends ItemTrait {
             return;
         }
 
-        orb.assignment = { placementId: event.targetPlacementId, target: targetAnchor };
+        orb.assignment = {
+            placementId: event.targetPlacementId,
+            target: targetAnchor,
+        };
         orb.pendingPlacementId = undefined;
 
         // Inline orbit offset calculation
         const offset = CFrame.Angles(0, orb.angle, 0).mul(new CFrame(0, nanobot.orbitHeight, nanobot.orbitRadius));
         const targetCFrame = targetAnchor.CFrame.mul(offset);
 
-        const tween = TweenService.Create(orb.part, RETURN_TWEEN_INFO, { CFrame: targetCFrame });
+        const tween = TweenService.Create(orb.part, RETURN_TWEEN_INFO, {
+            CFrame: targetCFrame,
+        });
         orb.activeTween = tween;
         orb.traveling = true;
         tween.Completed.Once((state) => {
@@ -640,7 +662,9 @@ export default class Nanobot extends ItemTrait {
         const offset = CFrame.Angles(0, orb.angle, 0).mul(new CFrame(0, nanobot.orbitHeight, nanobot.orbitRadius));
         const destination = anchor.CFrame.mul(offset);
 
-        const tween = TweenService.Create(orb.part, RETURN_TWEEN_INFO, { CFrame: destination });
+        const tween = TweenService.Create(orb.part, RETURN_TWEEN_INFO, {
+            CFrame: destination,
+        });
         orb.activeTween = tween;
         orb.traveling = true;
         tween.Completed.Once(() => {

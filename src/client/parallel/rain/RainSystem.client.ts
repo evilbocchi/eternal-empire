@@ -127,7 +127,12 @@ const baseRainAmount = 15;
 const range = 50;
 
 // Weather state
-let currentWeather: WeatherState = { type: WeatherType.Clear, intensity: 0, duration: 300, timeRemaining: 300 };
+let currentWeather: WeatherState = {
+    type: WeatherType.Clear,
+    intensity: 0,
+    duration: 300,
+    timeRemaining: 300,
+};
 let rainEnabled = false;
 let visualRainEnabled = true;
 
@@ -167,7 +172,11 @@ const { rainSFX, rainIndoorEq, rainIndoorReverb } = (() => {
     IndoorEq.Name = "IndoorEq";
     IndoorEq.Parent = Rain;
 
-    return { rainSFX: Rain, rainIndoorEq: IndoorEq, rainIndoorReverb: IndoorReverb };
+    return {
+        rainSFX: Rain,
+        rainIndoorEq: IndoorEq,
+        rainIndoorReverb: IndoorReverb,
+    };
 })();
 
 // Defined
@@ -339,7 +348,10 @@ const INDOOR_RAIN_VOLUME = 0.05;
 let rainVolumeTarget = OUTDOOR_RAIN_VOLUME;
 
 // Batch release tracking - avoid creating tons of task.delay calls
-const releaseBatch: Array<{ cached: CachedRainAttachment | CachedPuddleAttachment; releaseTime: number }> = [];
+const releaseBatch: Array<{
+    cached: CachedRainAttachment | CachedPuddleAttachment;
+    releaseTime: number;
+}> = [];
 
 // Player settings integration
 const settingsConnection = Packets.settings.observe((newSettings) => {

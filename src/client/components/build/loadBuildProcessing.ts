@@ -8,9 +8,10 @@ import { ASSETS } from "shared/asset/GameAssets";
 import { CAMERA, PLACED_ITEMS_FOLDER } from "shared/constants";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Items from "shared/items/Items";
+import Packets from "shared/Packets";
 import ItemPlacement from "shared/placement/ItemPlacement";
 import Sandbox from "shared/Sandbox";
-import Area from "shared/world/Area";
+import Area, { AREAS } from "shared/world/Area";
 
 declare global {
     interface Assets {
@@ -48,6 +49,9 @@ export default function loadBuildProcessing() {
 
     // Continuously load models for placed items in the workspace
     RunService.BindToRenderStep(KEY, 1, () => {
+        const areaId = Packets.currentArea.get();
+        area = areaId !== undefined ? AREAS[areaId] : undefined;
+
         for (const child of PLACED_ITEMS_FOLDER.GetChildren()) {
             onModelAdded(child);
         }

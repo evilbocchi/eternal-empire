@@ -19,7 +19,10 @@ export async function writeFileIfChanged(filePath, content, repoRoot) {
         const normalizedCurrentContent = currentContent.replace(/\r\n/g, "\n");
 
         if (normalizedCurrentContent === normalizedContent) {
-            return { message: `No changes detected in ${relativePath}`, changed: false };
+            return {
+                message: `No changes detected in ${relativePath}`,
+                changed: false,
+            };
         }
     } catch (error) {
         if (error?.code !== "ENOENT") {

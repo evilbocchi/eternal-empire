@@ -146,12 +146,18 @@ export default class SetupService implements OnInit, OnStart {
             return { success: false, message: `No such setup "${name}"` };
         }
         if (setup.area !== area) {
-            return { success: false, message: `Setup area mismatch. Expected ${area}, got ${setup.area}` };
+            return {
+                success: false,
+                message: `Setup area mismatch. Expected ${area}, got ${setup.area}`,
+            };
         }
 
         const savedItems = setup.items;
         if (savedItems === undefined) {
-            return { success: false, message: `No saved items in setup "${setup.name}"` };
+            return {
+                success: false,
+                message: `No saved items in setup "${setup.name}"`,
+            };
         }
 
         const items = new Set<PlacingInfo>();
@@ -181,7 +187,10 @@ export default class SetupService implements OnInit, OnStart {
             }) !== 0;
 
         if (!success) {
-            return { success: false, message: "Failed to place some or all items" };
+            return {
+                success: false,
+                message: "Failed to place some or all items",
+            };
         }
         return { success: true };
     }

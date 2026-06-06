@@ -5,7 +5,10 @@ import { RobotoMono } from "shared/asset/GameFonts";
 import Packets from "shared/Packets";
 
 export default function CopyWindow() {
-    const { id, visible, openDocument } = useSingleDocument({ id: "Copy", priority: 10 });
+    const { id, visible, openDocument } = useSingleDocument({
+        id: "Copy",
+        priority: 10,
+    });
     const [text, setText] = useState("Copy this text");
 
     useEffect(() => {

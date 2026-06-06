@@ -45,7 +45,12 @@ export default function ChallengeCompletionNotification({ data, onComplete }: Ch
 
     // Create victory particle effects
     const createVictoryParticles = () => {
-        const particles: Array<{ id: string; angle: number; delay: number; speed: number }> = [];
+        const particles: Array<{
+            id: string;
+            angle: number;
+            delay: number;
+            speed: number;
+        }> = [];
         for (let i = 0; i < 12; i++) {
             particles.push({
                 id: `victory_particle_${i}_${tick()}`,
@@ -645,7 +650,9 @@ function VictoryParticle({
 
         return () => {
             if (particle.Parent) {
-                TweenService.Create(particle, new TweenInfo(0.1), { ImageTransparency: 1 }).Play();
+                TweenService.Create(particle, new TweenInfo(0.1), {
+                    ImageTransparency: 1,
+                }).Play();
             }
         };
     }, [angle, delay, speed, color]);

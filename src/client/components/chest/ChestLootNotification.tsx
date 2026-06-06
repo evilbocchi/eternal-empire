@@ -408,7 +408,9 @@ function SlotSparkParticle({ angle, delay, color }: { angle: number; delay: numb
 
         return () => {
             if (particle.Parent) {
-                TweenService.Create(particle, new TweenInfo(0.1), { ImageTransparency: 1 }).Play();
+                TweenService.Create(particle, new TweenInfo(0.1), {
+                    ImageTransparency: 1,
+                }).Play();
             }
         };
     }, [angle, delay]);

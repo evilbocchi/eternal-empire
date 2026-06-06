@@ -52,7 +52,9 @@ export = CreateReactStory(
                     <textbutton
                         Size={new UDim2(0, 80, 0, 40)}
                         Text="Window 3"
-                        Event={{ Activated: () => DocumentManager.toggle("Low Priority Window") }}
+                        Event={{
+                            Activated: () => DocumentManager.toggle("Low Priority Window"),
+                        }}
                     />
                 </frame>
 

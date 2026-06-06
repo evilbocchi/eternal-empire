@@ -53,8 +53,12 @@ export function BaseMenuOption({
                 if (button && shadow) {
                     const bounce = new TweenInfo(fast ? 0.75 : 1, Enum.EasingStyle.Back, Enum.EasingDirection.Out);
 
-                    TweenService.Create(button, bounce, { Position: originalButtonPos }).Play();
-                    TweenService.Create(shadow, bounce, { Position: originalShadowPos }).Play();
+                    TweenService.Create(button, bounce, {
+                        Position: originalButtonPos,
+                    }).Play();
+                    TweenService.Create(shadow, bounce, {
+                        Position: originalShadowPos,
+                    }).Play();
                 }
                 if (label) {
                     TweenService.Create(label, new TweenInfo(fast ? 1 : 1.4), {

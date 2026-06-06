@@ -137,7 +137,14 @@ export default function RepairWindow() {
     const random = useMemo(() => new Random(), []);
     const heartbeatRef = useRef<RBXScriptConnection>();
     const [sparks, setSparks] = useState<
-        Array<{ id: string; angle: number; distance: number; delay: number; velocity: number; tier: RepairResultTier }>
+        Array<{
+            id: string;
+            angle: number;
+            distance: number;
+            delay: number;
+            velocity: number;
+            tier: RepairResultTier;
+        }>
     >([]);
     const [consecutiveFailures, setConsecutiveFailures] = useState(0);
 

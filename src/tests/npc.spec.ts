@@ -56,7 +56,9 @@ describe("npc interaction gating", () => {
             } as PathWaypoint,
         ]);
         let capturedEnd: (() => void) | undefined;
-        const npcAny = npc as unknown as { pathfind: (...args: unknown[]) => RBXScriptConnection };
+        const npcAny = npc as unknown as {
+            pathfind: (...args: unknown[]) => RBXScriptConnection;
+        };
         const pathfindSpy = jest.spyOn(npcAny, "pathfind").mockImplementation((...received) => {
             const [, , endCallback] = received as [unknown, PathWaypoint[], () => void];
             capturedEnd = endCallback;

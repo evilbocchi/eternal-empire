@@ -12,7 +12,9 @@ class BuildGrid extends WorldNode {
         for (const grid of this.INSTANCES) {
             const texture = grid.FindFirstChildOfClass("Texture");
             if (texture === undefined) continue;
-            TweenService.Create(texture, this.TRANSPARENCY_TWEENINFO, { Transparency: transparency }).Play();
+            TweenService.Create(texture, this.TRANSPARENCY_TWEENINFO, {
+                Transparency: transparency,
+            }).Play();
         }
     }
 }

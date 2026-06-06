@@ -10,9 +10,13 @@ export default function NPCNotification({ prompt }: { prompt: ProximityPrompt })
             if (!imageRef.current) return;
 
             if (prompt.Enabled) {
-                TweenService.Create(imageRef.current, new TweenInfo(0.3), { ImageTransparency: 0 }).Play();
+                TweenService.Create(imageRef.current, new TweenInfo(0.3), {
+                    ImageTransparency: 0,
+                }).Play();
             } else {
-                TweenService.Create(imageRef.current, new TweenInfo(0.15), { ImageTransparency: 1 }).Play();
+                TweenService.Create(imageRef.current, new TweenInfo(0.15), {
+                    ImageTransparency: 1,
+                }).Play();
             }
         };
         const conn = prompt.GetPropertyChangedSignal("Enabled").Connect(update);

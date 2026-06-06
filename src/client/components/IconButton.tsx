@@ -19,13 +19,19 @@ function IconButton(props: IconButtonProps) {
     const scale = hovering ? 1.05 : 1;
     useEffect(() => {
         const tweenInfo = new TweenInfo(0.2);
-        TweenService.Create(buttonRef.current!, tweenInfo, { ImageColor3: color }).Play();
-        TweenService.Create(scaleRef.current!, tweenInfo, { Scale: scale }).Play();
+        TweenService.Create(buttonRef.current!, tweenInfo, {
+            ImageColor3: color,
+        }).Play();
+        TweenService.Create(scaleRef.current!, tweenInfo, {
+            Scale: scale,
+        }).Play();
     }, [hovering]);
 
     const handleClick = () => {
         scaleRef.current!.Scale = 0.9;
-        TweenService.Create(scaleRef.current!, new TweenInfo(0.5), { Scale: scale }).Play();
+        TweenService.Create(scaleRef.current!, new TweenInfo(0.5), {
+            Scale: scale,
+        }).Play();
         props.onClick?.();
     };
 

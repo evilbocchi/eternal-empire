@@ -178,7 +178,15 @@ export default class Upgrader extends Operative {
             const modelInfo = getAllInstanceInfo(model);
             const laserInfo = getAllInstanceInfo(laser);
             VirtualCollision.onDropletTouched(model, laser, (droplet, dropletInfo) => {
-                this.upgrade({ model, modelInfo, upgrader, dropletInfo, laserInfo, droplet, deco });
+                this.upgrade({
+                    model,
+                    modelInfo,
+                    upgrader,
+                    dropletInfo,
+                    laserInfo,
+                    droplet,
+                    deco,
+                });
             });
             laserInfo.itemModelInfo = modelInfo;
             model.Destroying.Once(() => {

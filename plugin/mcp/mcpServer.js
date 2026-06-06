@@ -28,7 +28,10 @@ export async function startMcpServer(logger) {
         const args = typeof rawArgs === "object" && rawArgs !== null ? rawArgs : {};
 
         try {
-            const result = await executeMcpTool(name, args, { logger, logPrefix: "[MCP]" });
+            const result = await executeMcpTool(name, args, {
+                logger,
+                logPrefix: "[MCP]",
+            });
             return {
                 content: [
                     {

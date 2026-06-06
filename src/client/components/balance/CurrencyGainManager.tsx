@@ -90,8 +90,12 @@ function createCurrencyGain(
 
     // Animate transparency if quality is high enough
     if (UserGameSettings!.SavedQualityLevel.Value > 5) {
-        TweenService.Create(imageLabel, tweenInfo, { ImageTransparency: 1 }).Play();
-        TweenService.Create(textLabel, tweenInfo, { TextTransparency: 1 }).Play();
+        TweenService.Create(imageLabel, tweenInfo, {
+            ImageTransparency: 1,
+        }).Play();
+        TweenService.Create(textLabel, tweenInfo, {
+            TextTransparency: 1,
+        }).Play();
         TweenService.Create(stroke, tweenInfo, { Transparency: 1 }).Play();
     }
 }
@@ -159,7 +163,10 @@ function CurrencyGainManager() {
             burnSound.SoundGroup = SOUND_EFFECTS_GROUP;
             burnSound.Parent = dropletModel;
             burnSound.Play();
-            TweenService.Create(dropletModel, tweenInfo, { Color: new Color3(), Size: new Vector3() }).Play();
+            TweenService.Create(dropletModel, tweenInfo, {
+                Color: new Color3(),
+                Size: new Vector3(),
+            }).Play();
 
             Debris.AddItem(dropletModel, 6);
             dropletModel.Anchored = true; // NOTE: causes desync, server sees it stop without even touching lava

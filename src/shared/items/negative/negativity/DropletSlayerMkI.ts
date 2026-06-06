@@ -30,6 +30,8 @@ export = new Item(script.Name)
         BaseDropletSlayer.activatePacket.fromServer(model, () => {
             sound.Play();
             laser.Transparency = 0.3;
-            TweenService.Create(laser, new TweenInfo(0.5), { Transparency: 1 }).Play();
+            TweenService.Create(laser, new TweenInfo(0.5), {
+                Transparency: 1,
+            }).Play();
         });
     });

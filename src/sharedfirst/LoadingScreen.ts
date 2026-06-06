@@ -194,9 +194,16 @@ namespace LoadingScreen {
                 }).Play();
             });
 
-            TweenService.Create(label, tweenInfo, { TextTransparency: 0, TextStrokeTransparency: 0 }).Play();
-            TweenService.Create(longHand!, tweenInfo, { ImageTransparency: 0 }).Play();
-            TweenService.Create(shortHand!, tweenInfo, { ImageTransparency: 0 }).Play();
+            TweenService.Create(label, tweenInfo, {
+                TextTransparency: 0,
+                TextStrokeTransparency: 0,
+            }).Play();
+            TweenService.Create(longHand!, tweenInfo, {
+                ImageTransparency: 0,
+            }).Play();
+            TweenService.Create(shortHand!, tweenInfo, {
+                ImageTransparency: 0,
+            }).Play();
         }
 
         // Start clock update loop
@@ -233,10 +240,20 @@ namespace LoadingScreen {
             Size: new UDim2(0, 0, 0, 0),
         });
         tween.Play();
-        TweenService.Create(backdrop!, tweenInfo, { BackgroundTransparency: 1, ImageTransparency: 1 }).Play();
-        TweenService.Create(label!, tweenInfo, { TextTransparency: 1, TextStrokeTransparency: 1 }).Play();
-        TweenService.Create(longHand!, tweenInfo, { ImageTransparency: 1 }).Play();
-        TweenService.Create(shortHand!, tweenInfo, { ImageTransparency: 1 }).Play();
+        TweenService.Create(backdrop!, tweenInfo, {
+            BackgroundTransparency: 1,
+            ImageTransparency: 1,
+        }).Play();
+        TweenService.Create(label!, tweenInfo, {
+            TextTransparency: 1,
+            TextStrokeTransparency: 1,
+        }).Play();
+        TweenService.Create(longHand!, tweenInfo, {
+            ImageTransparency: 1,
+        }).Play();
+        TweenService.Create(shortHand!, tweenInfo, {
+            ImageTransparency: 1,
+        }).Play();
 
         const connection = tween.Completed.Once((state) => {
             if (state !== Enum.PlaybackState.Completed) {

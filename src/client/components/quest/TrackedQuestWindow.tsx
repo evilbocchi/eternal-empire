@@ -47,7 +47,10 @@ export default function TrackedQuestWindow() {
 
     const openPosition = new UDim2(1, -5, 0, 30);
     const closedPosition = openPosition.add(new UDim2(0, 0, 0, -100));
-    const { visible, setVisible } = useDocument({ id: "TrackedQuest", priority: -1 });
+    const { visible, setVisible } = useDocument({
+        id: "TrackedQuest",
+        priority: -1,
+    });
 
     useEffect(() => {
         if (visible) {

@@ -169,7 +169,7 @@ function csvEscape(value) {
         return "";
     }
     const str = String(value);
-    if (str.includes("\"") || str.includes(",") || str.includes("\n")) {
+    if (str.includes('"') || str.includes(",") || str.includes("\n")) {
         return `"${str.replace(/"/g, '""')}"`;
     }
     return str;
@@ -296,7 +296,7 @@ function writeArtifacts({ state, detail, report, logs, rawJson, jsonError, expor
         entry.cumulativeTimeLabel ?? "",
         entry.limitingCurrency ?? "",
         entry.limitingCurrencyLabel ?? "",
-        entry.isLong === true ? "true" : entry.isLong === false ? "false" : entry.isLong ?? "",
+        entry.isLong === true ? "true" : entry.isLong === false ? "false" : (entry.isLong ?? ""),
     ]);
     writeCsv(
         paths.progressionCsv,
@@ -336,9 +336,10 @@ function extractReportPayload(logText) {
     console.log(`Total log entries: ${logEntries.length}`);
 
     const beginIndex = logEntries.findIndex((entry) => entry.trim() === REPORT_BEGIN_MARKER);
-    const endIndex = beginIndex === -1
-        ? logEntries.findIndex((entry) => entry.trim() === REPORT_END_MARKER)
-        : logEntries.findIndex((entry, index) => index > beginIndex && entry.trim() === REPORT_END_MARKER);
+    const endIndex =
+        beginIndex === -1
+            ? logEntries.findIndex((entry) => entry.trim() === REPORT_END_MARKER)
+            : logEntries.findIndex((entry, index) => index > beginIndex && entry.trim() === REPORT_END_MARKER);
 
     console.log(`BEGIN marker found at index: ${beginIndex}`);
     console.log(`END marker found at index: ${endIndex}`);
@@ -365,26 +366,26 @@ function extractReportPayload(logText) {
     // Strategy 2: Fallback when BEGIN marker missing but END marker present
     else if (beginIndex === -1 && endIndex !== -1) {
         console.log("BEGIN marker missing, attempting fallback extraction...");
-        
+
         // Join all logs before END marker
         const logsBeforeEnd = logEntries.slice(0, endIndex).join("");
-        
+
         // The first captured item starts mid-array; match the progression item key ("order" or compact "o")
         // Look for the pattern `"order":` or `"o":` which identifies progression items
         // (first char might be comma or space+comma depending on join behavior)
         const firstItemPattern = /"(?:order|o)":\s*\d+/;
         const firstItemMatch = logsBeforeEnd.match(firstItemPattern);
-        
+
         if (firstItemMatch) {
             console.log(`Found truncated array start at position ${firstItemMatch.index}`);
-            
+
             // Check what comes before the item key - should be a comma
             const beforeKey = logsBeforeEnd.substring(Math.max(0, firstItemMatch.index - 5), firstItemMatch.index);
             console.log(`Characters before item key: "${beforeKey}"`);
-            
+
             // Find the comma before the item key
-            const commaPos = logsBeforeEnd.lastIndexOf(',', firstItemMatch.index);
-            
+            const commaPos = logsBeforeEnd.lastIndexOf(",", firstItemMatch.index);
+
             if (commaPos !== -1) {
                 console.log(`Found comma at position ${commaPos}, extracting from there...`);
                 // Start from after the comma, prepend opening bracket and brace
@@ -395,13 +396,13 @@ function extractReportPayload(logText) {
         } else {
             console.error("Unable to find progression item pattern in logs.");
         }
-        
+
         // Add closing bracket if needed
         if (rawJson && !rawJson.trim().endsWith("]")) {
             console.log("Appending missing ']' to complete array...");
             rawJson += "]";
         }
-        
+
         if (rawJson) {
             try {
                 // The extracted content might have extra JSON after the progression array
@@ -417,25 +418,26 @@ function extractReportPayload(logText) {
                 // Look for: }]," where the comma is followed by a JSON property name
                 // To distinguish from nested arrays, we'll find ALL }], patterns and take the last one
                 // before the total content ends
-                
+
                 console.log("Initial parse failed, looking for array boundary...");
                 // Look for the specific pattern that marks the end of the progression array
                 // The output structure is: [...progression items...],"profiling":{...}
-                const arrayEndPattern = /\}\]\s*,\s*"(?:profiling|summary|upgradesSimulated|resetLayersSimulated|runDurationSeconds|generatedAt|topLongest|f|s|u|r|d|g|l)"/;
+                const arrayEndPattern =
+                    /\}\]\s*,\s*"(?:profiling|summary|upgradesSimulated|resetLayersSimulated|runDurationSeconds|generatedAt|topLongest|f|s|u|r|d|g|l)"/;
                 const arrayEndMatch = rawJson.match(arrayEndPattern);
-                
+
                 if (arrayEndMatch) {
                     console.log(`Found array end pattern at position ${arrayEndMatch.index}`);
-                    
+
                     // Extract just up to and including the }]
                     rawJson = rawJson.substring(0, arrayEndMatch.index + 2); // +2 for }]
-                    
+
                     try {
                         report = JSON.parse(rawJson);
                         report = expandCompactReport(report);
                         const parsedCount = getProgressionLength(report);
                         console.log(`Successfully parsed trimmed JSON with ${parsedCount} items.`);
-                        
+
                         // The parsed result is just the progression array (items 38-696)
                         // We need to wrap it in the expected report structure
                         if (Array.isArray(report)) {
@@ -463,7 +465,7 @@ function extractReportPayload(logText) {
                     } catch (retryError) {
                         jsonError = retryError instanceof Error ? retryError.message : String(retryError);
                         console.error("Failed to parse trimmed JSON:", jsonError);
-                        
+
                         // Save failed parse for debugging
                         const failedPath = path.join(import.meta.dirname, "../docsout/failed_parse.json");
                         fs.writeFileSync(failedPath, rawJson, "utf-8");
@@ -472,7 +474,7 @@ function extractReportPayload(logText) {
                 } else {
                     jsonError = error instanceof Error ? error.message : String(error);
                     console.error("Failed to parse fallback JSON and couldn't find array boundary:", jsonError);
-                    
+
                     // Save failed parse for debugging
                     const failedPath = path.join(import.meta.dirname, "../docsout/failed_parse.json");
                     fs.writeFileSync(failedPath, rawJson, "utf-8");
@@ -488,8 +490,8 @@ function extractReportPayload(logText) {
         beginIndex !== -1 && endIndex !== -1 && endIndex > beginIndex
             ? [...logEntries.slice(0, beginIndex), ...logEntries.slice(endIndex + 1)]
             : beginIndex === -1 && endIndex !== -1
-            ? logEntries.slice(endIndex + 1) // Fallback: skip everything before END marker
-            : logEntries;
+              ? logEntries.slice(endIndex + 1) // Fallback: skip everything before END marker
+              : logEntries;
 
     return { report, logs, rawJson, jsonError };
 }
@@ -521,7 +523,7 @@ async function main() {
         place: path.join(repoRoot, "sandbox", "local.rbxl"),
         out: outputPath,
         silent: true,
-        exit: false
+        exit: false,
     });
 
     // Capture Roblox logs
@@ -530,20 +532,36 @@ async function main() {
     }
 
     if (exitCode === 0) {
-        runResult = { state: "success", detail: "Luau task completed successfully.", exitCode: 0 };
+        runResult = {
+            state: "success",
+            detail: "Luau task completed successfully.",
+            exitCode: 0,
+        };
         finalize(robloxLog);
     } else if (exitCode === 1) {
-        runResult = { state: "failure", detail: "Luau task reported failure.", exitCode: 1 };
+        runResult = {
+            state: "failure",
+            detail: "Luau task reported failure.",
+            exitCode: 1,
+        };
         finalize(robloxLog);
     } else {
         console.warn("Cloud execution skipped (missing configuration).");
-        runResult = { state: "skipped", detail: "Cloud execution skipped (missing configuration).", exitCode: 0 };
+        runResult = {
+            state: "skipped",
+            detail: "Cloud execution skipped (missing configuration).",
+            exitCode: 0,
+        };
         finalize(robloxLog);
     }
 }
 
 main().catch((error) => {
     console.log(`Progression estimation runner encountered an error: ${error?.message ?? String(error)}`);
-    runResult = { state: "error", detail: error?.message ?? String(error), exitCode: 1 };
+    runResult = {
+        state: "error",
+        detail: error?.message ?? String(error),
+        exitCode: 1,
+    };
     finalize(robloxLog);
 });

@@ -90,7 +90,9 @@ namespace MusicManager {
     }
 
     export function fadeOut(sound: Sound) {
-        const tween = TweenService.Create(sound, new TweenInfo(1), { Volume: 0 });
+        const tween = TweenService.Create(sound, new TweenInfo(1), {
+            Volume: 0,
+        });
         tween.Completed.Once(() => {
             sound.Stop();
         });

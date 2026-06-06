@@ -142,7 +142,9 @@ const details = {
     },
 };
 
-export const CURRENCY_DETAILS = details as { [currency in Currency]: CurrencyDetails };
+export const CURRENCY_DETAILS = details as {
+    [currency in Currency]: CurrencyDetails;
+};
 
 export const CURRENCIES = (() => {
     const currencies = new Array<Currency>();

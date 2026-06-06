@@ -44,7 +44,9 @@ const TELEPORTABLE_AREAS: {
 };
 
 export default function PortableBeaconWindow() {
-    const { id, visible, openDocument, closeDocument } = useSingleDocument({ id: "PortableBeacon" });
+    const { id, visible, openDocument, closeDocument } = useSingleDocument({
+        id: "PortableBeacon",
+    });
     const [unlockedAreas, setUnlockedAreas] = useState<Set<AreaId>>(new Set(["BarrenIslands"]));
 
     useEffect(() => {

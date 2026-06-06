@@ -448,7 +448,7 @@ export default class ResearchService implements OnStart {
                     }
                 } else if (effect.kind === "increaseDifficultyPowerFormula") {
                     // Evaluate formula based on the x parameter
-                    let xValue = new OnoeNum(0);
+                    let xValue: OnoeNum;
                     switch (effect.x) {
                         case "playtime":
                             xValue = new OnoeNum(this.playtimeService.getPlaytime());

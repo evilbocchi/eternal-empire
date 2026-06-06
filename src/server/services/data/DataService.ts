@@ -99,7 +99,9 @@ export default class DataService implements OnStart, OnPlayerAdded {
         if (IS_STUDIO && empireData.playtime === 0) {
             pcall(() => {
                 const response = HttpService.GetAsync("http://localhost:28354/saves/latest.json");
-                const parsed = HttpService.JSONDecode(response) as { empireData?: EmpireData };
+                const parsed = HttpService.JSONDecode(response) as {
+                    empireData?: EmpireData;
+                };
 
                 if (parsed.empireData !== undefined) {
                     // Merge all fields from latest.json into current empireData

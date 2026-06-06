@@ -221,7 +221,9 @@ async function playThunderSequence(currentCamera: Camera): Promise<void> {
     playSound("Thunder.mp3");
     const lightning = ASSETS.Resets.WaitForChild("SkillificationLightning").Clone() as BasePart;
     lightning.Parent = Workspace;
-    TweenService.Create(lightning, new TweenInfo(1), { Transparency: 1 }).Play();
+    TweenService.Create(lightning, new TweenInfo(1), {
+        Transparency: 1,
+    }).Play();
 
     await new Promise<void>((resolve) => {
         task.delay(0.35, () => {

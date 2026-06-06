@@ -11,7 +11,5 @@
             ]
         }
     },
-    "forwardPorts": [
-        34872
-    ]
+    "forwardPorts": [34872]
 }

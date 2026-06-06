@@ -33,13 +33,25 @@ export default function LevelUpNotification({ data, onComplete }: LevelUpNotific
     const shineTextRef = useRef<TextLabel>();
     const glowRef = useRef<Frame>();
     const [sparks, setSparks] = useState<
-        Array<{ id: string; angle: number; distance: number; delay: number; velocity: number }>
+        Array<{
+            id: string;
+            angle: number;
+            distance: number;
+            delay: number;
+            velocity: number;
+        }>
     >([]);
     const animationStarted = useRef(false);
 
     // Create sparkle effects around the notification
     const createSparks = () => {
-        const sparkArray: Array<{ id: string; angle: number; distance: number; delay: number; velocity: number }> = [];
+        const sparkArray: Array<{
+            id: string;
+            angle: number;
+            distance: number;
+            delay: number;
+            velocity: number;
+        }> = [];
         for (let i = 0; i < 12; i++) {
             sparkArray.push({
                 id: `spark_${i}_${tick()}`,
@@ -535,7 +547,9 @@ function SparkEffect({
             // Cleanup when component unmounts
             animationConnection?.Disconnect();
             if (spark.Parent) {
-                TweenService.Create(spark, new TweenInfo(0.1), { ImageTransparency: 1 }).Play();
+                TweenService.Create(spark, new TweenInfo(0.1), {
+                    ImageTransparency: 1,
+                }).Play();
             }
         };
     }, [angle, distance, delay, velocity]);

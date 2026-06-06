@@ -40,7 +40,6 @@ function openStudioWithPlace(placePath) {
     });
 }
 
-
 function main() {
     const __dirname = path.dirname(new URL(import.meta.url).pathname);
     // On Windows, pathname may start with a slash (e.g. /C:/...), so remove it if present

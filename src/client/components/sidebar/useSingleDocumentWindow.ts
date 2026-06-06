@@ -25,7 +25,11 @@ export default function useSingleDocument({
     /** Optional callback after the document is opened. */
     onOpen?: () => void;
 }) {
-    const { visible, setVisible } = useDocument({ id, defaultVisible, priority });
+    const { visible, setVisible } = useDocument({
+        id,
+        defaultVisible,
+        priority,
+    });
 
     useEffect(() => {
         if (visible) {

@@ -96,16 +96,24 @@ export default function performNewBeginningsWakeUp() {
     const fabricRustle = () => playSound("FabricRustle.mp3");
     task.delay(2, () => {
         fabricRustle();
-        TweenService.Create(camera, new TweenInfo(0.5), { CFrame: WAYPOINTS.NewBeginningsCamera1.CFrame }).Play();
-        TweenService.Create(blackWindow, new TweenInfo(2), { BackgroundTransparency: 1 }).Play();
+        TweenService.Create(camera, new TweenInfo(0.5), {
+            CFrame: WAYPOINTS.NewBeginningsCamera1.CFrame,
+        }).Play();
+        TweenService.Create(blackWindow, new TweenInfo(2), {
+            BackgroundTransparency: 1,
+        }).Play();
     });
     task.delay(2.96, () => {
         fabricRustle();
-        TweenService.Create(camera, new TweenInfo(0.5), { CFrame: WAYPOINTS.NewBeginningsCamera2.CFrame }).Play();
+        TweenService.Create(camera, new TweenInfo(0.5), {
+            CFrame: WAYPOINTS.NewBeginningsCamera2.CFrame,
+        }).Play();
     });
     task.delay(3.7, () => {
         fabricRustle();
-        TweenService.Create(camera, new TweenInfo(0.5), { CFrame: WAYPOINTS.NewBeginningsCamera3.CFrame }).Play();
+        TweenService.Create(camera, new TweenInfo(0.5), {
+            CFrame: WAYPOINTS.NewBeginningsCamera3.CFrame,
+        }).Play();
     });
     task.delay(5, () => {
         playSound("JumpSwish.mp3");

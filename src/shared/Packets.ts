@@ -133,7 +133,9 @@ namespace Packets {
     export const dropletBurnt = packet<(dropletModelId: string, amountPerCurrency: BaseCurrencyMap) => void>({
         isUnreliable: true,
     });
-    export const dropletSurged = packet<(dropletModelId: string) => void>({ isUnreliable: true });
+    export const dropletSurged = packet<(dropletModelId: string) => void>({
+        isUnreliable: true,
+    });
     export const setVelocity = packet<(dropletModelId: string, velocity: Vector3) => void>({ isUnreliable: true });
 
     // weather
@@ -231,7 +233,9 @@ namespace Packets {
     export interface ToolUsePayload {
         target?: Instance;
     }
-    export const useTool = packet<(payload: ToolUsePayload) => void>({ isUnreliable: true });
+    export const useTool = packet<(payload: ToolUsePayload) => void>({
+        isUnreliable: true,
+    });
 
     // visual
     export const shakeCamera = packet<(presetName: keyof typeof CameraShaker.Presets) => void>();

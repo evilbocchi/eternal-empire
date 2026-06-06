@@ -15,7 +15,11 @@ export = CreateReactStory(
     (props) => {
         const parsed = DataStoreService.GetOrderedDataStore(props.controls.store).GetSortedAsync(false, 100);
         const page = parsed.GetCurrentPage();
-        const content = new Array<{ position: number; player: string; score: string }>();
+        const content = new Array<{
+            position: number;
+            player: string;
+            score: string;
+        }>();
         for (let i = 0; i < page.size(); i++) {
             const entry = page[i];
             if (entry === undefined) continue;

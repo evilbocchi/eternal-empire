@@ -18,7 +18,9 @@ const tweenInfo = new TweenInfo(0.1, Enum.EasingStyle.Linear);
 
 export default class LaserFan extends ItemTrait {
     static readonly laserFanChanged = perItemPacket(
-        packet<(placementId: string, cframe: CFrame) => void>({ isUnreliable: true }),
+        packet<(placementId: string, cframe: CFrame) => void>({
+            isUnreliable: true,
+        }),
         { slowStart: true },
     );
 
@@ -60,7 +62,9 @@ export default class LaserFan extends ItemTrait {
         const motor = model.WaitForChild("Motor") as Model;
         const primaryPart = weldModel(motor);
         LaserFan.laserFanChanged.fromServer(model, (cframe) => {
-            TweenService.Create(primaryPart, tweenInfo, { CFrame: cframe }).Play();
+            TweenService.Create(primaryPart, tweenInfo, {
+                CFrame: cframe,
+            }).Play();
         });
     }
 

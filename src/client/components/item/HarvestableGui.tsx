@@ -60,7 +60,10 @@ function HarvestableGui({ enabled, model }: { enabled: boolean; model: PVInstanc
             if (currentTool === undefined) return;
 
             const highlight = new Instance("Highlight");
-            TweenService.Create(highlight, new TweenInfo(0.5), { FillTransparency: 1, OutlineTransparency: 1 }).Play();
+            TweenService.Create(highlight, new TweenInfo(0.5), {
+                FillTransparency: 1,
+                OutlineTransparency: 1,
+            }).Play();
             highlight.Adornee = model;
 
             const blade = currentTool.FindFirstChild("Blade") as BasePart | undefined;

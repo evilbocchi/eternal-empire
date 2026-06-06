@@ -98,8 +98,12 @@ export default function TooltipWindow() {
             frameRef.current.Visible = true;
 
             const tweenInfo = new TweenInfo(0.2);
-            TweenService.Create(frameRef.current, tweenInfo, { BackgroundTransparency: 0.2 }).Play();
-            TweenService.Create(strokeRef.current, tweenInfo, { Transparency: 0.2 }).Play();
+            TweenService.Create(frameRef.current, tweenInfo, {
+                BackgroundTransparency: 0.2,
+            }).Play();
+            TweenService.Create(strokeRef.current, tweenInfo, {
+                Transparency: 0.2,
+            }).Play();
             if (messageRef.current)
                 TweenService.Create(messageRef.current, tweenInfo, {
                     TextTransparency: 0,
@@ -108,8 +112,12 @@ export default function TooltipWindow() {
         } else {
             const tweenInfo = new TweenInfo(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.In);
 
-            const tween = TweenService.Create(frameRef.current, tweenInfo, { BackgroundTransparency: 1 });
-            TweenService.Create(strokeRef.current, tweenInfo, { Transparency: 1 }).Play();
+            const tween = TweenService.Create(frameRef.current, tweenInfo, {
+                BackgroundTransparency: 1,
+            });
+            TweenService.Create(strokeRef.current, tweenInfo, {
+                Transparency: 1,
+            }).Play();
             if (messageRef.current)
                 TweenService.Create(messageRef.current, tweenInfo, {
                     TextTransparency: 1,

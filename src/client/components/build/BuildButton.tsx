@@ -71,7 +71,9 @@ function BuildButton({
             if (scale) {
                 // Quick press animation
                 scale.Scale = 0.9;
-                TweenService.Create(scale, SCALE_TWEEN_INFO, { Scale: 1 }).Play();
+                TweenService.Create(scale, SCALE_TWEEN_INFO, {
+                    Scale: 1,
+                }).Play();
             }
         }
 

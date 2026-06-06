@@ -74,7 +74,9 @@ function performCameraFocus(guiPart: Part) {
     const tweenInfo = new TweenInfo(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
 
     cancelCameraTween();
-    const tween = TweenService.Create(camera, tweenInfo, { CFrame: targetCFrame });
+    const tween = TweenService.Create(camera, tweenInfo, {
+        CFrame: targetCFrame,
+    });
     cameraTween = tween;
     tween.Completed.Once(() => {
         if (cameraTween === tween) {
@@ -121,7 +123,9 @@ function restoreCamera() {
     cancelCameraTween();
 
     const tweenInfo = new TweenInfo(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
-    const tween = TweenService.Create(camera, tweenInfo, { CFrame: state.cframe });
+    const tween = TweenService.Create(camera, tweenInfo, {
+        CFrame: state.cframe,
+    });
     camera.CameraType = Enum.CameraType.Scriptable;
     camera.CameraSubject = undefined;
     camera.Focus = state.focus;
@@ -144,7 +148,9 @@ function restoreCamera() {
 }
 
 function hideShopGuiPart(guiPart: Part) {
-    TweenService.Create(guiPart, new TweenInfo(0.3), { LocalTransparencyModifier: 1 }).Play();
+    TweenService.Create(guiPart, new TweenInfo(0.3), {
+        LocalTransparencyModifier: 1,
+    }).Play();
     guiPart.CanQuery = false;
 
     const sound = getSound("ShopClose.mp3");
@@ -159,7 +165,9 @@ function playOpenEffects(guiPart: Part) {
     sound.Parent = guiPart;
     Debris.AddItem(sound, 5);
 
-    TweenService.Create(guiPart, new TweenInfo(0.3), { LocalTransparencyModifier: 0 }).Play();
+    TweenService.Create(guiPart, new TweenInfo(0.3), {
+        LocalTransparencyModifier: 0,
+    }).Play();
     guiPart.CanQuery = true;
 }
 

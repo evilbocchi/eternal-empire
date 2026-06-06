@@ -30,7 +30,10 @@ import Packets from "shared/Packets";
  * Features modern design with validation and smooth user interactions
  */
 export default function RenameWindow() {
-    const { id, visible, closeDocument } = useSingleDocument({ id: "Rename", priority: 3 });
+    const { id, visible, closeDocument } = useSingleDocument({
+        id: "Rename",
+        priority: 3,
+    });
 
     // Observe data from packets
     const renameCost = useProperty(Packets.renameCost);

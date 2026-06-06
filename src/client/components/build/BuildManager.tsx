@@ -487,7 +487,10 @@ namespace BuildManager {
             const relative = cframe.mul(offset);
             (indicator as BasePart).CFrame = relative;
 
-            if (animate === true) TweenService.Create(primaryPart, MOVETWEENINFO, { CFrame: relative }).Play();
+            if (animate === true)
+                TweenService.Create(primaryPart, MOVETWEENINFO, {
+                    CFrame: relative,
+                }).Play();
             else primaryPart.CFrame = relative;
         }
         const lastSound = tick() - lastMovedTo;

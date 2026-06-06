@@ -1,169 +1,39 @@
 name: Continuous Integration
 
 on:
-    push:
-        branches: [main]
-    pull_request:
-        branches: [main]
-    # Allow manual triggering for releases
-    workflow_dispatch:
-        inputs:
-            version:
-                description: "Release version (e.g. 1.0.0)"
-                required: true
-                default: ""
-            create_release:
-                description: "Create GitHub Release"
-                type: boolean
-                default: false
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        env:
-            ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
-            ROBLOX_GROUP_ID: ${{ secrets.ROBLOX_GROUP_ID }}
-            RBXLUAU_CREDENTIALS: ${{ secrets.RBXLUAU_CREDENTIALS }}
+  test:
+    runs-on: ubuntu-latest
+    env:
+      ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
+      ROBLOX_GROUP_ID: ${{ secrets.ROBLOX_GROUP_ID }}
+      RBXLUAU_CREDENTIALS: ${{ secrets.RBXLUAU_CREDENTIALS }}
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 22
-                  cache: "npm"
+      - name: Build project
+        run: bun run build
 
-            - name: Install dependencies
-              run: npm ci
+      - name: Run ESLint
+        run: bun run lint
 
-            - name: Build project
-              run: npm run build
+      - name: Run tests
+        run: bun run test -- --coverage
+        continue-on-error: false
 
-            - name: Run ESLint
-              run: npm run lint
+      - name: Run plugin tests
+        run: bun run test:plugin
+        continue-on-error: false
 
-            - name: Run tests
-              run: npm run test -- --coverage
-              continue-on-error: false
-
-            - name: Run plugin tests
-              run: npm run test:plugin
-              continue-on-error: false
-
-            - name: Upload coverage reports
-              uses: actions/upload-artifact@v4
-              if: always()
-              with:
-                  name: coverage-report
-                  path: coverage/
-                  retention-days: 7
-
-            - name: Code Coverage Summary Report
-              uses: irongut/CodeCoverageSummary@v1.3.0
-              if: always()
-              with:
-                  filename: coverage/cobertura-coverage.xml
-                  badge: true
-                  format: markdown
-                  hide_branch_rate: false
-                  hide_complexity: true
-                  indicators: true
-                  output: both
-
-            - name: Add Coverage PR Comment
-              uses: marocchino/sticky-pull-request-comment@v2
-              if: github.event_name == 'pull_request' && (success() || failure())
-              with:
-                  recreate: true
-                  path: code-coverage-results.md
-
-            - name: Create build artifact directory
-              run: mkdir -p build-artifacts
-
-            - name: Get version from package.json
-              id: get-version
-              if: github.event_name == 'push'
-              shell: bash
-              run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-
-            - name: Set release version
-              id: version
-              run: |
-                  if [ "${{ github.event_name }}" == "push" ]; then
-                    echo "release_version=${{ steps.get-version.outputs.version }}" >> $GITHUB_OUTPUT
-                  else
-                    echo "release_version=${{ github.event.inputs.version || 'latest' }}" >> $GITHUB_OUTPUT
-                  fi
-
-            - name: Package project files
-              run: |
-                  # Create a zip file with all necessary files
-                  zip -r build-artifacts/ee-${{ steps.version.outputs.release_version }}.zip \
-                    out/ \
-                    assets/ \
-                    include/ \
-                    default.project.json \
-                    README.md \
-                    LICENSE
-
-                  # Copy place file to artifacts with versioned name
-                  cp sandbox/local.rbxl build-artifacts/ee-${{ steps.version.outputs.release_version }}.rbxl
-
-            - name: Upload build artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                  name: ee-build-${{ steps.version.outputs.release_version }}
-                  path: |
-                      build-artifacts/*.zip
-                      build-artifacts/*.rbxl
-                  retention-days: 30
-
-            - name: Create GitHub Release
-              if: ${{ inputs.create_release }}
-              uses: softprops/action-gh-release@v1
-              with:
-                  files: |
-                      build-artifacts/ee-${{ steps.version.outputs.release_version }}.zip
-                      build-artifacts/ee-${{ steps.version.outputs.release_version }}.rbxl
-                  tag_name: v${{ steps.version.outputs.release_version }}
-                  name: v${{ steps.version.outputs.release_version }}
-                  body: |
-                      This release was automatically generated by GitHub Actions.
-
-                      ## Changes
-
-                      _Please manually update this section with the relevant changes._
-
-                      ## Files
-
-                      - `ee-${{ steps.version.outputs.release_version }}.zip` - Complete source and assets
-                      - `ee-${{ steps.version.outputs.release_version }}.rbxl` - Built Roblox place file
-                  draft: true
-                  prerelease: false
-                  token: ${{ github.token }}
-
-    security:
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "20.x"
-                  cache: "npm"
-
-            - name: Install dependencies
-              run: npm ci
-
-            - name: Run security audit
-              run: npm audit --audit-level=moderate
-              continue-on-error: true
-
-            - name: Check for outdated packages
-              run: npm outdated
-              continue-on-error: true
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
