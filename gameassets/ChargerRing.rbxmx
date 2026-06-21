@@ -1,0 +1,35 @@
+<roblox version="4">
+  <Item class="Beam" referent="0">
+    <Properties>
+      <string name="Name">ChargerRing</string>
+      <Ref name="Attachment0">null</Ref>
+      <Ref name="Attachment1">null</Ref>
+      <BinaryString name="AttributesSerialize"></BinaryString>
+      <float name="Brightness">1</float>
+      <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+      <ColorSequence name="Color">0 0.6666667 1 1 0 1 0.6666667 1 1 0 </ColorSequence>
+      <float name="CurveSize0">5.5</float>
+      <float name="CurveSize1">-6</float>
+      <bool name="Enabled">true</bool>
+      <bool name="FaceCamera">false</bool>
+      <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+      <float name="LightEmission">0</float>
+      <float name="LightInfluence">1</float>
+      <bool name="DefinesCapabilities">false</bool>
+      <int name="Segments">100</int>
+      <int64 name="SourceAssetId">-1</int64>
+      <BinaryString name="Tags"></BinaryString>
+      <ContentId name="Texture">
+        <url>rbxassetid://4839671501</url>
+      </ContentId>
+      <float name="TextureLength">1</float>
+      <token name="TextureMode">0</token>
+      <float name="TextureSpeed">0</float>
+      <NumberSequence name="Transparency">0 0.5 0 1 0.5 0 </NumberSequence>
+      <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001674</UniqueId>
+      <float name="Width0">8</float>
+      <float name="Width1">8</float>
+      <float name="ZOffset">0</float>
+    </Properties>
+  </Item>
+</roblox>

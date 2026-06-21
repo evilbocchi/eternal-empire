@@ -1,0 +1,134 @@
+{
+  "className": "ParticleEmitter",
+  "properties": {
+    "Size": {
+      "NumberSequence": {
+        "keypoints": [
+          {
+            "time": 0.0,
+            "value": 0.0,
+            "envelope": 0.0
+          },
+          {
+            "time": 0.2025,
+            "value": 0.54644823,
+            "envelope": 0.0
+          },
+          {
+            "time": 0.55875,
+            "value": 4.5901637,
+            "envelope": 0.58757555
+          },
+          {
+            "time": 0.805,
+            "value": 9.453552,
+            "envelope": 0.44039643
+          },
+          {
+            "time": 1.0,
+            "value": 10.0,
+            "envelope": 0.0
+          }
+        ]
+      }
+    },
+    "Speed": {
+      "NumberRange": [
+        0.5,
+        1.0
+      ]
+    },
+    "SpreadAngle": [
+      10.0,
+      -10.0
+    ],
+    "Color": {
+      "ColorSequence": {
+        "keypoints": [
+          {
+            "time": 0.0,
+            "color": [
+              0.43529412,
+              0.8666667,
+              1.0
+            ]
+          },
+          {
+            "time": 1.0,
+            "color": [
+              0.43529412,
+              0.8666667,
+              1.0
+            ]
+          }
+        ]
+      }
+    },
+    "LightEmission": 0.4000000059604645,
+    "FlipbookBlendFrames": {
+      "Bool": true
+    },
+    "Lifetime": {
+      "NumberRange": [
+        0.6,
+        0.6
+      ]
+    },
+    "Texture": "rbxassetid://8047533775",
+    "Transparency": {
+      "NumberSequence": {
+        "keypoints": [
+          {
+            "time": 0.0,
+            "value": 1.0,
+            "envelope": 0.0
+          },
+          {
+            "time": 0.1702454,
+            "value": 0.7,
+            "envelope": 0.014880952
+          },
+          {
+            "time": 0.22546011,
+            "value": 0.03125,
+            "envelope": 0.03125
+          },
+          {
+            "time": 0.28527606,
+            "value": 0.0,
+            "envelope": 0.0
+          },
+          {
+            "time": 0.702454,
+            "value": 0.0,
+            "envelope": 0.0
+          },
+          {
+            "time": 0.83742326,
+            "value": 0.9125,
+            "envelope": 0.06014608
+          },
+          {
+            "time": 1.0,
+            "value": 1.0,
+            "envelope": 0.0
+          }
+        ]
+      }
+    },
+    "Brightness": 10.0,
+    "RotSpeed": {
+      "NumberRange": [
+        200.0,
+        400.0
+      ]
+    },
+    "Orientation": "VelocityPerpendicular",
+    "Rotation": {
+      "NumberRange": [
+        -180.0,
+        180.0
+      ]
+    }
+  }
+}

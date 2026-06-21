@@ -1,0 +1,224 @@
+<roblox version="4">
+  <Item class="Part" referent="0">
+    <Properties>
+      <string name="Name">Handle</string>
+      <bool name="Anchored">false</bool>
+      <BinaryString name="AttributesSerialize"></BinaryString>
+      <bool name="AudioCanCollide">true</bool>
+      <float name="BackParamA">-0.5</float>
+      <float name="BackParamB">0.5</float>
+      <token name="BackSurface">0</token>
+      <token name="BackSurfaceInput">0</token>
+      <float name="BottomParamA">-0.5</float>
+      <float name="BottomParamB">0.5</float>
+      <token name="BottomSurface">0</token>
+      <token name="BottomSurfaceInput">0</token>
+      <CoordinateFrame name="CFrame">
+        <X>-5.6355534</X>
+        <Y>126.88733</Y>
+        <Z>8.418723</Z>
+        <R00>0.09104404</R00>
+        <R01>-0.88109946</R01>
+        <R02>0.46408436</R02>
+        <R10>0.5370117</R10>
+        <R11>0.43589485</R11>
+        <R12>0.7222291</R12>
+        <R20>-0.83864856</R20>
+        <R21>0.18346372</R21>
+        <R22>0.5128456</R22>
+      </CoordinateFrame>
+      <bool name="CanCollide">true</bool>
+      <bool name="CanQuery">true</bool>
+      <bool name="CanTouch">true</bool>
+      <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+      <bool name="CastShadow">true</bool>
+      <string name="CollisionGroup">Default</string>
+      <int name="CollisionGroupId">0</int>
+      <Color3uint8 name="Color3uint8">6512482</Color3uint8>
+      <PhysicalProperties name="CustomPhysicalProperties">
+        <CustomPhysics>false</CustomPhysics>
+      </PhysicalProperties>
+      <bool name="EnableFluidForces">true</bool>
+      <token name="formFactorRaw">2</token>
+      <float name="FrontParamA">-0.5</float>
+      <float name="FrontParamB">0.5</float>
+      <token name="FrontSurface">0</token>
+      <token name="FrontSurfaceInput">0</token>
+      <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+      <float name="LeftParamA">-0.5</float>
+      <float name="LeftParamB">0.5</float>
+      <token name="LeftSurface">0</token>
+      <token name="LeftSurfaceInput">0</token>
+      <bool name="Locked">true</bool>
+      <bool name="Massless">false</bool>
+      <token name="Material">256</token>
+      <string name="MaterialVariantSerialized"></string>
+      <CoordinateFrame name="PivotOffset">
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+        <R00>1</R00>
+        <R01>0</R01>
+        <R02>0</R02>
+        <R10>0</R10>
+        <R11>1</R11>
+        <R12>0</R12>
+        <R20>0</R20>
+        <R21>0</R21>
+        <R22>1</R22>
+      </CoordinateFrame>
+      <float name="Reflectance">0.4</float>
+      <float name="RightParamA">-0.5</float>
+      <float name="RightParamB">0.5</float>
+      <token name="RightSurface">0</token>
+      <token name="RightSurfaceInput">0</token>
+      <int name="RootPriority">0</int>
+      <Vector3 name="RotVelocity">
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+      </Vector3>
+      <bool name="DefinesCapabilities">false</bool>
+      <token name="shape">1</token>
+      <Vector3 name="size">
+        <X>1</X>
+        <Y>0.8</Y>
+        <Z>4</Z>
+      </Vector3>
+      <int64 name="SourceAssetId">-1</int64>
+      <BinaryString name="Tags"></BinaryString>
+      <float name="TopParamA">-0.5</float>
+      <float name="TopParamB">0.5</float>
+      <token name="TopSurface">0</token>
+      <token name="TopSurfaceInput">0</token>
+      <float name="Transparency">0</float>
+      <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001616</UniqueId>
+      <Vector3 name="Velocity">
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+      </Vector3>
+    </Properties>
+    <Item class="Sound" referent="1">
+      <Properties>
+        <string name="Name">SwordSlash</string>
+        <bool name="AcousticSimulationEnabled">true</bool>
+        <BinaryString name="AttributesSerialize"></BinaryString>
+        <Content name="AudioContent">
+          <uri>http://www.roblox.com/asset/?id=12222216</uri>
+        </Content>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <NumberRange name="LoopRegion">0 60000 </NumberRange>
+        <bool name="Looped">false</bool>
+        <bool name="PlayOnRemove">false</bool>
+        <NumberRange name="PlaybackRegion">0 60000 </NumberRange>
+        <bool name="PlaybackRegionsEnabled">false</bool>
+        <float name="PlaybackSpeed">1</float>
+        <bool name="Playing">false</bool>
+        <float name="xmlRead_MaxDistance_3">10000</float>
+        <float name="EmitterSize">10</float>
+        <token name="RollOffMode">0</token>
+        <bool name="DefinesCapabilities">false</bool>
+        <Ref name="SoundGroup">null</Ref>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <double name="TimePosition">0</double>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001617</UniqueId>
+        <float name="Volume">0.875</float>
+      </Properties>
+    </Item>
+    <Item class="Sound" referent="2">
+      <Properties>
+        <string name="Name">SwordLunge</string>
+        <bool name="AcousticSimulationEnabled">true</bool>
+        <BinaryString name="AttributesSerialize"></BinaryString>
+        <Content name="AudioContent">
+          <uri>http://www.roblox.com/asset/?id=12222208</uri>
+        </Content>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <NumberRange name="LoopRegion">0 60000 </NumberRange>
+        <bool name="Looped">false</bool>
+        <bool name="PlayOnRemove">false</bool>
+        <NumberRange name="PlaybackRegion">0 60000 </NumberRange>
+        <bool name="PlaybackRegionsEnabled">false</bool>
+        <float name="PlaybackSpeed">1</float>
+        <bool name="Playing">false</bool>
+        <float name="xmlRead_MaxDistance_3">10000</float>
+        <float name="EmitterSize">10</float>
+        <token name="RollOffMode">0</token>
+        <bool name="DefinesCapabilities">false</bool>
+        <Ref name="SoundGroup">null</Ref>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <double name="TimePosition">0</double>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001618</UniqueId>
+        <float name="Volume">0.75</float>
+      </Properties>
+    </Item>
+    <Item class="Sound" referent="3">
+      <Properties>
+        <string name="Name">Unsheath</string>
+        <bool name="AcousticSimulationEnabled">true</bool>
+        <BinaryString name="AttributesSerialize"></BinaryString>
+        <Content name="AudioContent">
+          <uri>http://www.roblox.com/asset/?id=12222225</uri>
+        </Content>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <NumberRange name="LoopRegion">0 60000 </NumberRange>
+        <bool name="Looped">false</bool>
+        <bool name="PlayOnRemove">false</bool>
+        <NumberRange name="PlaybackRegion">0 60000 </NumberRange>
+        <bool name="PlaybackRegionsEnabled">false</bool>
+        <float name="PlaybackSpeed">1</float>
+        <bool name="Playing">false</bool>
+        <float name="xmlRead_MaxDistance_3">10000</float>
+        <float name="EmitterSize">10</float>
+        <token name="RollOffMode">0</token>
+        <bool name="DefinesCapabilities">false</bool>
+        <Ref name="SoundGroup">null</Ref>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <double name="TimePosition">0</double>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001619</UniqueId>
+        <float name="Volume">1.25</float>
+      </Properties>
+    </Item>
+    <Item class="SpecialMesh" referent="4">
+      <Properties>
+        <string name="Name">Mesh</string>
+        <BinaryString name="AttributesSerialize"></BinaryString>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <ContentId name="MeshId">
+          <url>rbxasset://fonts/sword.mesh</url>
+        </ContentId>
+        <token name="MeshType">5</token>
+        <Vector3 name="Offset">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+        </Vector3>
+        <bool name="DefinesCapabilities">false</bool>
+        <Vector3 name="Scale">
+          <X>1</X>
+          <Y>1</Y>
+          <Z>1</Z>
+        </Vector3>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <ContentId name="TextureId">
+          <url>rbxasset://textures/SwordTexture.png</url>
+        </ContentId>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000161a</UniqueId>
+        <Vector3 name="VertexColor">
+          <X>1</X>
+          <Y>1</Y>
+          <Z>1</Z>
+        </Vector3>
+      </Properties>
+    </Item>
+  </Item>
+</roblox>

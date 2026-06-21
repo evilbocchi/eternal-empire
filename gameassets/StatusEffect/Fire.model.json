@@ -1,0 +1,106 @@
+{
+  "className": "ParticleEmitter",
+  "properties": {
+    "Size": {
+      "NumberSequence": {
+        "keypoints": [
+          {
+            "time": 0.0,
+            "value": 0.75,
+            "envelope": 0.0
+          },
+          {
+            "time": 1.0,
+            "value": 0.0,
+            "envelope": 0.0
+          }
+        ]
+      }
+    },
+    "LightInfluence": 1.0,
+    "Speed": {
+      "NumberRange": [
+        3.0,
+        3.0
+      ]
+    },
+    "SpreadAngle": [
+      15.0,
+      15.0
+    ],
+    "Color": {
+      "ColorSequence": {
+        "keypoints": [
+          {
+            "time": 0.0,
+            "color": [
+              1.0,
+              0.47058824,
+              0.039215688
+            ]
+          },
+          {
+            "time": 0.113144755,
+            "color": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          {
+            "time": 0.53743756,
+            "color": [
+              1.0,
+              0.0,
+              0.23137255
+            ]
+          },
+          {
+            "time": 0.79034936,
+            "color": [
+              1.0,
+              0.5172483,
+              0.12389499
+            ]
+          },
+          {
+            "time": 0.8569051,
+            "color": [
+              1.0,
+              0.38676256,
+              0.5286489
+            ]
+          },
+          {
+            "time": 0.9950083,
+            "color": [
+              1.0,
+              0.55395687,
+              0.65715903
+            ]
+          },
+          {
+            "time": 1.0,
+            "color": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          }
+        ]
+      }
+    },
+    "LightEmission": 0.3499999940395355,
+    "Rate": 10.0,
+    "FlipbookBlendFrames": {
+      "Bool": true
+    },
+    "Lifetime": {
+      "NumberRange": [
+        0.2,
+        1.0
+      ]
+    },
+    "Texture": "rbxassetid://405886187"
+  }
+}

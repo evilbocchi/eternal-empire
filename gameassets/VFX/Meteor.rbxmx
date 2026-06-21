@@ -1,0 +1,1972 @@
+<roblox version="4">
+  <Item class="MeshPart" referent="0">
+    <Properties>
+      <string name="Name">Meteor</string>
+      <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
+      <bool name="Anchored">true</bool>
+      <BinaryString name="AttributesSerialize"></BinaryString>
+      <bool name="AudioCanCollide">true</bool>
+      <float name="BackParamA">-0.5</float>
+      <float name="BackParamB">0.5</float>
+      <token name="BackSurface">0</token>
+      <token name="BackSurfaceInput">0</token>
+      <float name="BottomParamA">-0.5</float>
+      <float name="BottomParamB">0.5</float>
+      <token name="BottomSurface">0</token>
+      <token name="BottomSurfaceInput">0</token>
+      <CoordinateFrame name="CFrame">
+        <X>4.373331</X>
+        <Y>56.42249</Y>
+        <Z>4.859455</Z>
+        <R00>0.7433077</R00>
+        <R01>-0.6614943</R01>
+        <R02>0.099593356</R02>
+        <R10>0</R10>
+        <R11>0.14888018</R11>
+        <R12>0.98885524</R12>
+        <R20>-0.6689496</R20>
+        <R21>-0.73502374</R21>
+        <R22>0.1106638</R22>
+      </CoordinateFrame>
+      <bool name="CanCollide">false</bool>
+      <bool name="CanQuery">true</bool>
+      <bool name="CanTouch">true</bool>
+      <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+      <bool name="CastShadow">true</bool>
+      <string name="CollisionGroup">Default</string>
+      <int name="CollisionGroupId">0</int>
+      <Color3uint8 name="Color3uint8">10510133</Color3uint8>
+      <PhysicalProperties name="CustomPhysicalProperties">
+        <CustomPhysics>false</CustomPhysics>
+      </PhysicalProperties>
+      <bool name="DoubleSided">false</bool>
+      <bool name="EnableFluidForces">true</bool>
+      <token name="FluidFidelityInternal">0</token>
+      <float name="FrontParamA">-0.5</float>
+      <float name="FrontParamB">0.5</float>
+      <token name="FrontSurface">0</token>
+      <token name="FrontSurfaceInput">0</token>
+      <bool name="HasJointOffset">false</bool>
+      <bool name="HasSkinnedMesh">false</bool>
+      <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+      <bool name="InertiaMigrated">false</bool>
+      <Vector3 name="InitialSize">
+        <X>2.0297</X>
+        <Y>1.97821</Y>
+        <Z>2.0574799</Z>
+      </Vector3>
+      <Vector3 name="JointOffset">
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+      </Vector3>
+      <float name="LeftParamA">-0.5</float>
+      <float name="LeftParamB">0.5</float>
+      <token name="LeftSurface">0</token>
+      <token name="LeftSurfaceInput">0</token>
+      <bool name="Locked">false</bool>
+      <bool name="Massless">false</bool>
+      <token name="Material">800</token>
+      <string name="MaterialVariantSerialized"></string>
+      <Content name="MeshContent">
+        <uri>http://www.roblox.com/asset/?id=1290033</uri>
+      </Content>
+      <SharedString name="PhysicalConfigData">b2oDbLly8O7dwC3I0R2oLg==</SharedString>
+      <BinaryString name="PhysicsData">
+      </BinaryString>
+      <CoordinateFrame name="PivotOffset">
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+        <R00>1</R00>
+        <R01>0</R01>
+        <R02>0</R02>
+        <R10>0</R10>
+        <R11>1</R11>
+        <R12>0</R12>
+        <R20>0</R20>
+        <R21>0</R21>
+        <R22>1</R22>
+      </CoordinateFrame>
+      <float name="Reflectance">0</float>
+      <token name="RenderFidelity">1</token>
+      <float name="RightParamA">-0.5</float>
+      <float name="RightParamB">0.5</float>
+      <token name="RightSurface">0</token>
+      <token name="RightSurfaceInput">0</token>
+      <int name="RootPriority">0</int>
+      <Vector3 name="RotVelocity">
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+      </Vector3>
+      <bool name="DefinesCapabilities">false</bool>
+      <Vector3 name="size">
+        <X>17.872</X>
+        <Y>18.431</Y>
+        <Z>17.89</Z>
+      </Vector3>
+      <int64 name="SourceAssetId">-1</int64>
+      <BinaryString name="Tags"></BinaryString>
+      <Content name="TextureContent">
+        <uri>http://www.roblox.com/asset/?id=3197743</uri>
+      </Content>
+      <float name="TopParamA">-0.5</float>
+      <float name="TopParamB">0.5</float>
+      <token name="TopSurface">0</token>
+      <token name="TopSurfaceInput">0</token>
+      <float name="Transparency">0</float>
+      <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000161c</UniqueId>
+      <Vector3 name="UnscaledCofm">
+        <X>0.0035516936</X>
+        <Y>-0.0090810945</Y>
+        <Z>-0.0035530615</Z>
+      </Vector3>
+      <Vector3 name="UnscaledVolInertiaDiags">
+        <X>1.3924514</X>
+        <Y>1.3470329</Y>
+        <Z>1.3537095</Z>
+      </Vector3>
+      <Vector3 name="UnscaledVolInertiaOffDiags">
+        <X>-0.06978783</X>
+        <Y>-0.037126314</Y>
+        <Z>0.024539892</Z>
+      </Vector3>
+      <float name="UnscaledVolume">3.6506238</float>
+      <Vector3 name="Velocity">
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+      </Vector3>
+      <int name="VertexCount">302</int>
+    </Properties>
+    <Item class="Attachment" referent="1">
+      <Properties>
+        <string name="Name">Core</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYxZA==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>1.4838555</X>
+          <Y>-3.1558912</Y>
+          <Z>-17.117805</Z>
+          <R00>0.67875403</R00>
+          <R01>-0.73034036</R01>
+          <R02>-0.0767852</R02>
+          <R10>0.72608596</R10>
+          <R11>0.6517657</R11>
+          <R12>0.21909058</R12>
+          <R20>-0.109964736</R20>
+          <R21>-0.20446125</R21>
+          <R22>0.9726785</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000161d</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+    </Item>
+    <Item class="ParticleEmitter" referent="2">
+      <Properties>
+        <string name="Name">Flames</string>
+        <Vector3 name="Acceleration">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+        </Vector3>
+        <BinaryString name="AttributesSerialize"></BinaryString>
+        <float name="Brightness">1</float>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <ColorSequence name="Color">0 0 0 0 0 1 0 0 0 0 </ColorSequence>
+        <float name="Drag">1</float>
+        <token name="EmissionDirection">2</token>
+        <bool name="Enabled">true</bool>
+        <bool name="FlipbookBlendFrames">true</bool>
+        <NumberRange name="FlipbookFramerate">1 1 </NumberRange>
+        <string name="FlipbookIncompatible">Particle texture must be 1024 by 1024 to use flipbooks.</string>
+        <token name="FlipbookLayout">0</token>
+        <token name="FlipbookMode">0</token>
+        <int name="FlipbookSizeX">1</int>
+        <int name="FlipbookSizeY">1</int>
+        <bool name="FlipbookStartRandom">false</bool>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <NumberRange name="Lifetime">0.6 0.6 </NumberRange>
+        <float name="LightEmission">0.6</float>
+        <float name="LightInfluence">0</float>
+        <bool name="LockedToPart">false</bool>
+        <token name="Orientation">0</token>
+        <float name="Rate">200</float>
+        <NumberRange name="RotSpeed">-180 0 </NumberRange>
+        <NumberRange name="Rotation">-360 360 </NumberRange>
+        <bool name="DefinesCapabilities">false</bool>
+        <token name="Shape">0</token>
+        <token name="ShapeInOut">0</token>
+        <float name="ShapePartial">1</float>
+        <token name="ShapeStyle">0</token>
+        <NumberSequence name="Size">0 6.25 0 0.36196318 0.98958313 0 1 0 0 </NumberSequence>
+        <int64 name="SourceAssetId">-1</int64>
+        <NumberRange name="Speed">0 0 </NumberRange>
+        <Vector2 name="SpreadAngle">
+          <X>0</X>
+          <Y>0</Y>
+        </Vector2>
+        <NumberSequence name="Squash">0 0 0 1 0 0 </NumberSequence>
+        <BinaryString name="Tags"></BinaryString>
+        <ContentId name="Texture">
+          <url>rbxassetid://306272582</url>
+        </ContentId>
+        <float name="TimeScale">1</float>
+        <NumberSequence name="Transparency">0 0 0 0.59969324 1 0 1 1 0 </NumberSequence>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000161e</UniqueId>
+        <float name="VelocityInheritance">100</float>
+        <bool name="WindAffectsDrag">false</bool>
+        <float name="ZOffset">-4</float>
+      </Properties>
+    </Item>
+    <Item class="Attachment" referent="3">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYxZg==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>13.837645</X>
+          <Y>21.501146</Y>
+          <Z>17.35439</Z>
+          <R00>0.67875403</R00>
+          <R01>-0.73034036</R01>
+          <R02>-0.0767852</R02>
+          <R10>0.72608596</R10>
+          <R11>0.6517657</R11>
+          <R12>0.21909058</R12>
+          <R20>-0.109964736</R20>
+          <R21>-0.20446125</R21>
+          <R22>0.9726785</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000161f</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="4">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">3</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjFm</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">false</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001620</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="5">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYyMQ==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>-1.9849632</X>
+          <Y>25.756699</Y>
+          <Z>15.146854</Z>
+          <R00>-0.050766647</R00>
+          <R01>-0.9957544</R01>
+          <R02>-0.07678512</R02>
+          <R10>0.9734341</R10>
+          <R11>-0.06652332</R11>
+          <R12>0.21909064</R12>
+          <R20>-0.22326846</R20>
+          <R21>-0.06362276</R21>
+          <R22>0.9726784</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001621</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="6">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">5</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjIx</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">false</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001622</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="7">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYyMw==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>-12.57777</X>
+          <Y>13.547372</Y>
+          <Z>1.038105</Z>
+          <R00>-0.7357859</R00>
+          <R01>-0.67284703</R01>
+          <R02>-0.07678525</R02>
+          <R10>0.6458939</R10>
+          <R11>-0.7313142</R11>
+          <R12>0.21909064</R12>
+          <R20>-0.20356862</R20>
+          <R21>0.111608684</R21>
+          <R22>0.9726784</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001623</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="8">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">7</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjIz</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001624</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="9">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYyNQ==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>-15.182101</X>
+          <Y>5.7320538</Y>
+          <Z>2.5931702</Z>
+          <R00>-0.96156144</R00>
+          <R01>-0.2636355</R01>
+          <R02>-0.07678525</R02>
+          <R10>0.24168119</R10>
+          <R11>-0.94529873</R11>
+          <R12>0.21909058</R12>
+          <R20>-0.13034503</R20>
+          <R21>0.19211149</R21>
+          <R22>0.97267854</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001625</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="10">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">9</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjI1</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001626</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="11">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYyNw==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>24.389637</X>
+          <Y>6.9315567</Y>
+          <Z>21.46915</Z>
+          <R00>0.9965174</R00>
+          <R01>-0.032512967</R01>
+          <R02>-0.07678525</R02>
+          <R10>0.048675984</R10>
+          <R11>0.9744896</R11>
+          <R12>0.2190905</R12>
+          <R20>0.06770315</R20>
+          <R21>-0.22206509</R21>
+          <R22>0.97267854</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001627</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="12">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">11</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjI3</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">false</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001628</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="13">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYyOQ==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>-11.409116</X>
+          <Y>12.830431</Y>
+          <Z>1.291893</Z>
+          <R00>-0.72328866</R00>
+          <R01>-0.68626344</R01>
+          <R02>-0.07678523</R02>
+          <R10>0.6592327</R10>
+          <R11>-0.7193133</R11>
+          <R12>0.21909061</R12>
+          <R20>-0.20558652</R20>
+          <R21>0.10784643</R21>
+          <R22>0.9726784</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001629</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="14">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">13</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjI5</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000162a</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="15">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYyYg==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>-24.127571</X>
+          <Y>2.6491053</Y>
+          <Z>18.603642</Z>
+          <R00>0.99305105</R00>
+          <R01>-0.08918315</R01>
+          <R02>-0.076785274</R02>
+          <R10>0.10406613</R10>
+          <R11>0.9701389</R11>
+          <R12>0.2190907</R12>
+          <R20>0.05495318</R20>
+          <R21>-0.225559</R21>
+          <R22>0.97267836</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000162b</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="16">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">15</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjJi</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">-10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">false</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000162c</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="17">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYyZA==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>18.970802</X>
+          <Y>-10.507937</Y>
+          <Z>24.969372</Z>
+          <R00>0.7627176</R00>
+          <R01>0.64215726</R01>
+          <R02>-0.076785326</R02>
+          <R10>-0.61540973</R10>
+          <R11>0.7571462</R11>
+          <R12>0.21909045</R12>
+          <R20>0.19882819</R20>
+          <R21>-0.11984971</R21>
+          <R22>0.97267854</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000162d</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="18">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">17</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjJk</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">false</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000162e</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="19">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYyZg==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>-17.98709</X>
+          <Y>19.311972</Y>
+          <Z>15.334972</Z>
+          <R00>0.7627176</R00>
+          <R01>0.64215726</R01>
+          <R02>-0.076785326</R02>
+          <R10>-0.61540973</R10>
+          <R11>0.7571462</R11>
+          <R12>0.21909045</R12>
+          <R20>0.19882819</R20>
+          <R21>-0.11984971</R21>
+          <R22>0.97267854</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000162f</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="20">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">19</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjJm</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">-10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">false</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001630</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="21">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYzMQ==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>-14.538463</X>
+          <Y>-5.2304106</Y>
+          <Z>5.1130257</Z>
+          <R00>-0.8912642</R00>
+          <R01>0.44693664</R01>
+          <R02>-0.07678525</R02>
+          <R10>-0.45238656</R10>
+          <R11>-0.8644917</R11>
+          <R12>0.21909058</R12>
+          <R20>0.03153939</R20>
+          <R21>0.23000416</R21>
+          <R22>0.97267866</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001631</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="22">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">21</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjMx</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001632</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="23">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYzMw==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>12.320114</X>
+          <Y>-7.5251055</Y>
+          <Z>13.062061</Z>
+          <R00>-0.7357859</R00>
+          <R01>-0.67284703</R01>
+          <R02>-0.07678525</R02>
+          <R10>0.6458939</R10>
+          <R11>-0.7313142</R11>
+          <R12>0.21909064</R12>
+          <R20>-0.20356862</R20>
+          <R21>0.111608684</R21>
+          <R22>0.9726784</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001633</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="24">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">23</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjMz</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">-10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001634</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="25">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYzNQ==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>16.326073</X>
+          <Y>2.131276</Y>
+          <Z>5.8913918</Z>
+          <R00>-0.99669147</R00>
+          <R01>-0.02664849</R01>
+          <R02>-0.076785244</R02>
+          <R10>0.0092074275</R10>
+          <R11>-0.97566116</R11>
+          <R12>0.21909066</R12>
+          <R20>-0.0807548</R20>
+          <R21>0.21765879</R21>
+          <R22>0.97267854</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001635</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="26">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">25</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjM1</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">-10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001636</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="27">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYzNw==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>-0.9140365</X>
+          <Y>18.62828</Y>
+          <Z>0.8146019</Z>
+          <R00>-0.09719808</R00>
+          <R01>-0.9922987</R01>
+          <R02>-0.07678521</R02>
+          <R10>0.9692671</R10>
+          <R11>-0.111895576</R11>
+          <R12>0.21909067</R12>
+          <R20>-0.22599527</R20>
+          <R21>-0.05313018</R21>
+          <R22>0.97267854</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001637</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="28">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">27</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjM3</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001638</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="29">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYzOQ==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>12.441892</X>
+          <Y>-8.90817</Y>
+          <Z>8.071407</Z>
+          <R00>-0.72328866</R00>
+          <R01>-0.68626344</R01>
+          <R02>-0.07678523</R02>
+          <R10>0.6592327</R10>
+          <R11>-0.7193133</R11>
+          <R12>0.21909061</R12>
+          <R20>-0.20558652</R20>
+          <R21>0.10784643</R21>
+          <R22>0.9726784</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001639</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="30">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">29</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjM5</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">-10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000163a</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="31">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYzYg==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>15.947439</X>
+          <Y>10.243481</Y>
+          <Z>4.034359</Z>
+          <R00>-0.8912642</R00>
+          <R01>0.44693664</R01>
+          <R02>-0.07678525</R02>
+          <R10>-0.45238656</R10>
+          <R11>-0.8644917</R11>
+          <R12>0.21909058</R12>
+          <R20>0.03153939</R20>
+          <R21>0.23000416</R21>
+          <R22>0.97267866</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000163b</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="32">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">31</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjNi</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">-10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000163c</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="33">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYzZA==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>0.13516498</X>
+          <Y>-14.897907</Y>
+          <Z>24.471249</Z>
+          <R00>-0.050766647</R00>
+          <R01>-0.9957544</R01>
+          <R02>-0.07678512</R02>
+          <R10>0.9734341</R10>
+          <R11>-0.06652332</R11>
+          <R12>0.21909064</R12>
+          <R20>-0.22326846</R20>
+          <R21>-0.06362276</R21>
+          <R22>0.9726784</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000163d</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="34">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">33</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjNk</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">-10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000163e</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="35">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTYzZg==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>2.030608</X>
+          <Y>-13.560792</Y>
+          <Z>13.609341</Z>
+          <R00>-0.09719808</R00>
+          <R01>-0.9922987</R01>
+          <R02>-0.07678521</R02>
+          <R10>0.9692671</R10>
+          <R11>-0.111895576</R11>
+          <R12>0.21909067</R12>
+          <R20>-0.22599527</R20>
+          <R21>-0.05313018</R21>
+          <R22>0.97267854</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000163f</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="36">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">35</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjNm</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">-10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001640</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="37">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTY0MQ==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>-16.540241</X>
+          <Y>2.4350312</Y>
+          <Z>3.2283936</Z>
+          <R00>-0.99669147</R00>
+          <R01>-0.02664849</R01>
+          <R02>-0.076785244</R02>
+          <R10>0.0092074275</R10>
+          <R11>-0.97566116</R11>
+          <R12>0.21909066</R12>
+          <R20>-0.0807548</R20>
+          <R21>0.21765879</R21>
+          <R22>0.97267854</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001641</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="38">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">37</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjQx</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001642</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="39">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTY0Mw==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>21.203424</X>
+          <Y>7.3996353</Y>
+          <Z>21.112247</Z>
+          <R00>0.99305105</R00>
+          <R01>-0.08918315</R01>
+          <R02>-0.076785274</R02>
+          <R10>0.10406613</R10>
+          <R11>0.9701389</R11>
+          <R12>0.2190907</R12>
+          <R20>0.05495318</R20>
+          <R21>-0.225559</R21>
+          <R22>0.97267836</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001643</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="40">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">39</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjQz</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">false</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001644</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="41">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTY0NQ==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>12.529578</X>
+          <Y>20.968313</Y>
+          <Z>17.371204</Z>
+          <R00>0.62808853</R00>
+          <R01>-0.7743441</R01>
+          <R02>-0.07678533</R02>
+          <R10>0.76828396</R10>
+          <R11>0.6014475</R11>
+          <R12>0.21909058</R12>
+          <R20>-0.123469174</R20>
+          <R21>-0.19660121</R21>
+          <R22>0.9726784</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001645</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="42">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">41</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjQ1</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">false</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001646</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="43">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTY0Nw==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>-23.896713</X>
+          <Y>4.5727997</Y>
+          <Z>18.188602</Z>
+          <R00>0.9965174</R00>
+          <R01>-0.032512967</R01>
+          <R02>-0.07678525</R02>
+          <R10>0.048675984</R10>
+          <R11>0.9744896</R11>
+          <R12>0.2190905</R12>
+          <R20>0.06770315</R20>
+          <R21>-0.22206509</R21>
+          <R22>0.97267854</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001647</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="44">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">43</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjQ3</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">-10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">false</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001648</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="45">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTY0OQ==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>-13.701805</X>
+          <Y>-11.118263</Y>
+          <Z>22.527622</Z>
+          <R00>0.62808853</R00>
+          <R01>-0.7743441</R01>
+          <R02>-0.07678533</R02>
+          <R10>0.76828396</R10>
+          <R11>0.6014475</R11>
+          <R12>0.21909058</R12>
+          <R20>-0.123469174</R20>
+          <R21>-0.19660121</R21>
+          <R22>0.9726784</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001649</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="46">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">45</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjQ5</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">-10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000164a</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="47">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTY0Yg==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>-17.146046</X>
+          <Y>-11.643265</Y>
+          <Z>22.373974</Z>
+          <R00>0.67875403</R00>
+          <R01>-0.73034036</R01>
+          <R02>-0.0767852</R02>
+          <R10>0.72608596</R10>
+          <R11>0.6517657</R11>
+          <R12>0.21909058</R12>
+          <R20>-0.109964736</R20>
+          <R21>-0.20446125</R21>
+          <R22>0.9726785</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000164b</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="48">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">47</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjRi</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">-10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">false</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000164c</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="49">
+      <Properties>
+        <string name="Name">Orange Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTY0ZA==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>17.70847</X>
+          <Y>-2.5349052</Y>
+          <Z>7.051544</Z>
+          <R00>-0.96156144</R00>
+          <R01>-0.2636355</R01>
+          <R02>-0.07678525</R02>
+          <R10>0.24168119</R10>
+          <R11>-0.94529873</R11>
+          <R12>0.21909058</R12>
+          <R20>-0.13034503</R20>
+          <R21>0.19211149</R21>
+          <R22>0.97267854</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000164d</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="50">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">49</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjRk</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 0.33333334 0 0 1 1 0.33333334 0 0 </ColorSequence>
+          <float name="CurveSize0">-10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.49691737 0.45 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000164e</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="51">
+      <Properties>
+        <string name="Name">White Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTY0Zg==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>18.071283</X>
+          <Y>2.3199499</Y>
+          <Z>6.9504356</Z>
+          <R00>-0.99669147</R00>
+          <R01>-0.02664849</R01>
+          <R02>-0.076785244</R02>
+          <R10>0.0092074275</R10>
+          <R11>-0.97566116</R11>
+          <R12>0.21909066</R12>
+          <R20>-0.0807548</R20>
+          <R21>0.21765879</R21>
+          <R22>0.97267854</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c0000164f</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="52">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">51</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjRm</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 1 1 0 1 1 1 1 0 </ColorSequence>
+          <float name="CurveSize0">-10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.5006165 0.9625 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001650</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="53">
+      <Properties>
+        <string name="Name">White Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTY1MQ==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>15.123771</X>
+          <Y>10.067404</Y>
+          <Z>4.972782</Z>
+          <R00>-0.8912642</R00>
+          <R01>0.44693664</R01>
+          <R02>-0.07678525</R02>
+          <R10>-0.45238656</R10>
+          <R11>-0.8644917</R11>
+          <R12>0.21909058</R12>
+          <R20>0.03153939</R20>
+          <R21>0.23000416</R21>
+          <R22>0.97267866</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001651</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="54">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">53</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjUx</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 1 1 0 1 1 1 1 0 </ColorSequence>
+          <float name="CurveSize0">-10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.50123304 0.8875 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001652</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="55">
+      <Properties>
+        <string name="Name">White Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTY1Mw==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>-12.041433</X>
+          <Y>13.218746</Y>
+          <Z>2.118454</Z>
+          <R00>-0.7357859</R00>
+          <R01>-0.67284703</R01>
+          <R02>-0.07678525</R02>
+          <R10>0.6458939</R10>
+          <R11>-0.7313142</R11>
+          <R12>0.21909064</R12>
+          <R20>-0.20356862</R20>
+          <R21>0.111608684</R21>
+          <R22>0.9726784</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001653</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="56">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">55</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjUz</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 1 1 0 1 1 1 1 0 </ColorSequence>
+          <float name="CurveSize0">10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.5 0.875 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001654</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="57">
+      <Properties>
+        <string name="Name">White Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTY1NQ==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>-13.720691</X>
+          <Y>-4.573551</Y>
+          <Z>5.9933395</Z>
+          <R00>-0.8912642</R00>
+          <R01>0.44693664</R01>
+          <R02>-0.07678525</R02>
+          <R10>-0.45238656</R10>
+          <R11>-0.8644917</R11>
+          <R12>0.21909058</R12>
+          <R20>0.03153939</R20>
+          <R21>0.23000416</R21>
+          <R22>0.97267866</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001655</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="58">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">57</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjU1</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 1 1 0 1 1 1 1 0 </ColorSequence>
+          <float name="CurveSize0">10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.50184953 0.89375 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001656</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Attachment" referent="59">
+      <Properties>
+        <string name="Name">White Outline</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAxM2U4M2JmYWE2ZDgyMDIwMGE0OGZjMmMwMDAwMTY1Nw==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>-16.95318</X>
+          <Y>2.6435473</Y>
+          <Z>4.1125526</Z>
+          <R00>-0.99669147</R00>
+          <R01>-0.02664849</R01>
+          <R02>-0.076785244</R02>
+          <R10>0.0092074275</R10>
+          <R11>-0.97566116</R11>
+          <R12>0.21909066</R12>
+          <R20>-0.0807548</R20>
+          <R21>0.21765879</R21>
+          <R22>0.97267854</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001657</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+      <Item class="Beam" referent="60">
+        <Properties>
+          <string name="Name">Beam</string>
+          <Ref name="Attachment0">1</Ref>
+          <Ref name="Attachment1">59</Ref>
+          <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMTNlODNiZmFhNmQ4MjAyMDBhNDhmYzJjMDAwMDE2MWQXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADEzZTgzYmZhYTZkODIwMjAwYTQ4ZmMyYzAwMDAxNjU3</BinaryString>
+          <float name="Brightness">1</float>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <ColorSequence name="Color">0 1 1 1 0 1 1 1 1 0 </ColorSequence>
+          <float name="CurveSize0">10</float>
+          <float name="CurveSize1">0</float>
+          <bool name="Enabled">true</bool>
+          <bool name="FaceCamera">true</bool>
+          <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+          <float name="LightEmission">0</float>
+          <float name="LightInfluence">1</float>
+          <bool name="DefinesCapabilities">false</bool>
+          <int name="Segments">50</int>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <ContentId name="Texture">
+            <url>rbxassetid://6252012740</url>
+          </ContentId>
+          <float name="TextureLength">1</float>
+          <token name="TextureMode">0</token>
+          <float name="TextureSpeed">2</float>
+          <NumberSequence name="Transparency">0 1 0 0.50123304 0.925 0 1 1 0 </NumberSequence>
+          <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c00001658</UniqueId>
+          <float name="Width0">2.5</float>
+          <float name="Width1">10</float>
+          <float name="ZOffset">0</float>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <SharedStrings>
+    <SharedString md5="b2oDbLly8O7dwC3I0R2oLg==">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</SharedString>
+    <SharedString md5="rxNJufX5oaagQE3qNtzJSQ=="></SharedString>
+  </SharedStrings>
+</roblox>

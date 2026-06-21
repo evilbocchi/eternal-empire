@@ -1,0 +1,17 @@
+<roblox version="4">
+  <Item class="PitchShiftSoundEffect" referent="0">
+    <Properties>
+      <string name="Name">PitchShiftSoundEffect</string>
+      <BinaryString name="AttributesSerialize"></BinaryString>
+      <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+      <bool name="Enabled">true</bool>
+      <UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+      <float name="Octave">2</float>
+      <int name="Priority">0</int>
+      <bool name="DefinesCapabilities">false</bool>
+      <int64 name="SourceAssetId">-1</int64>
+      <BinaryString name="Tags"></BinaryString>
+      <UniqueId name="UniqueId">13e83bfaa6d820200a48fc2c000015c6</UniqueId>
+    </Properties>
+  </Item>
+</roblox>
