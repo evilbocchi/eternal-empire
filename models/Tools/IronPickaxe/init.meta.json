@@ -1,0 +1,48 @@
+{
+  "properties": {
+    "WorldPivotData": {
+      "OptionalCFrame": {
+        "position": [
+          451.02502,
+          0.15522847,
+          71.92493
+        ],
+        "orientation": [
+          [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        ]
+      }
+    },
+    "Grip": [
+      -1.25,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      -1.0,
+      -1.0,
+      0.0,
+      0.0
+    ]
+  },
+  "attributes": {
+    "Rojo_Target_PrimaryPart": "35bd9c6f327d77ef0a48fb370000726c"
+  },
+  "className": "Tool"
+}

@@ -1,0 +1,597 @@
+<roblox version="4">
+  <Item class="Model" referent="0">
+    <Properties>
+      <string name="Name">Bismuth</string>
+      <BinaryString name="AttributesSerialize">AQAAABcAAABSb2pvX1RhcmdldF9QcmltYXJ5UGFydAIgAAAAMzViZDljNmYzMjdkNzdlZjBhNDhmYjM3MDAwMDVlNzM=</BinaryString>
+      <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+      <UniqueId name="HistoryId">13a1df3d9f12f1ec08f15c8a00017998</UniqueId>
+      <token name="LevelOfDetail">0</token>
+      <CoordinateFrame name="ModelMeshCFrame">
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+        <R00>1</R00>
+        <R01>0</R01>
+        <R02>0</R02>
+        <R10>0</R10>
+        <R11>1</R11>
+        <R12>0</R12>
+        <R20>0</R20>
+        <R21>0</R21>
+        <R22>1</R22>
+      </CoordinateFrame>
+      <SharedString name="ModelMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
+      <Vector3 name="ModelMeshSize">
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+      </Vector3>
+      <token name="ModelStreamingMode">0</token>
+      <bool name="NeedsPivotMigration">false</bool>
+      <Ref name="PrimaryPart">1</Ref>
+      <bool name="DefinesCapabilities">false</bool>
+      <float name="ScaleFactor">2</float>
+      <SharedString name="SlimHash">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
+      <int64 name="SourceAssetId">14045960407</int64>
+      <BinaryString name="Tags"></BinaryString>
+      <UniqueId name="UniqueId">35bd9c6f327d77ef0a48fb3700005e72</UniqueId>
+      <OptionalCoordinateFrame name="WorldPivotData">
+        <CFrame>
+          <X>636</X>
+          <Y>2</Y>
+          <Z>90</Z>
+          <R00>-1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>-1</R22>
+        </CFrame>
+      </OptionalCoordinateFrame>
+    </Properties>
+    <Item class="Part" referent="1">
+      <Properties>
+        <string name="Name">Hitbox</string>
+        <bool name="Anchored">true</bool>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAzNWJkOWM2ZjMyN2Q3N2VmMGE0OGZiMzcwMDAwNWU3Mw==</BinaryString>
+        <bool name="AudioCanCollide">true</bool>
+        <float name="BackParamA">-0.5</float>
+        <float name="BackParamB">0.5</float>
+        <token name="BackSurface">3</token>
+        <token name="BackSurfaceInput">0</token>
+        <float name="BottomParamA">-0.5</float>
+        <float name="BottomParamB">0.5</float>
+        <token name="BottomSurface">3</token>
+        <token name="BottomSurfaceInput">0</token>
+        <CoordinateFrame name="CFrame">
+          <X>636</X>
+          <Y>3</Y>
+          <Z>90</Z>
+          <R00>-1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>-1</R22>
+        </CoordinateFrame>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanQuery">true</bool>
+        <bool name="CanTouch">true</bool>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <bool name="CastShadow">true</bool>
+        <string name="CollisionGroup">Default</string>
+        <int name="CollisionGroupId">0</int>
+        <Color3uint8 name="Color3uint8">1118481</Color3uint8>
+        <PhysicalProperties name="CustomPhysicalProperties">
+          <CustomPhysics>false</CustomPhysics>
+        </PhysicalProperties>
+        <bool name="EnableFluidForces">false</bool>
+        <token name="formFactorRaw">1</token>
+        <float name="FrontParamA">-0.5</float>
+        <float name="FrontParamB">0.5</float>
+        <token name="FrontSurface">3</token>
+        <token name="FrontSurfaceInput">0</token>
+        <UniqueId name="HistoryId">13a1df3d9f12f1ec08f15c8a00017999</UniqueId>
+        <float name="LeftParamA">-0.5</float>
+        <float name="LeftParamB">0.5</float>
+        <token name="LeftSurface">3</token>
+        <token name="LeftSurfaceInput">0</token>
+        <bool name="Locked">false</bool>
+        <bool name="Massless">false</bool>
+        <token name="Material">256</token>
+        <string name="MaterialVariantSerialized"></string>
+        <CoordinateFrame name="PivotOffset">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <float name="Reflectance">0</float>
+        <float name="RightParamA">-0.5</float>
+        <float name="RightParamB">0.5</float>
+        <token name="RightSurface">3</token>
+        <token name="RightSurfaceInput">0</token>
+        <int name="RootPriority">0</int>
+        <Vector3 name="RotVelocity">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+        </Vector3>
+        <bool name="DefinesCapabilities">false</bool>
+        <token name="shape">1</token>
+        <Vector3 name="size">
+          <X>6</X>
+          <Y>6</Y>
+          <Z>6</Z>
+        </Vector3>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <float name="TopParamA">-0.5</float>
+        <float name="TopParamB">0.5</float>
+        <token name="TopSurface">3</token>
+        <token name="TopSurfaceInput">0</token>
+        <float name="Transparency">1</float>
+        <UniqueId name="UniqueId">35bd9c6f327d77ef0a48fb3700005e73</UniqueId>
+        <Vector3 name="Velocity">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+        </Vector3>
+      </Properties>
+    </Item>
+    <Item class="UnionOperation" referent="2">
+      <Properties>
+        <string name="Name">Decoration</string>
+        <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
+        <bool name="Anchored">true</bool>
+        <ContentId name="AssetId">
+          <url>https://www.roblox.com//asset/?id=5229340813</url>
+        </ContentId>
+        <BinaryString name="AttributesSerialize"></BinaryString>
+        <bool name="AudioCanCollide">true</bool>
+        <float name="BackParamA">-0.5</float>
+        <float name="BackParamB">0.5</float>
+        <token name="BackSurface">0</token>
+        <token name="BackSurfaceInput">0</token>
+        <float name="BottomParamA">-0.5</float>
+        <float name="BottomParamB">0.5</float>
+        <token name="BottomSurface">0</token>
+        <token name="BottomSurfaceInput">0</token>
+        <CoordinateFrame name="CFrame">
+          <X>636</X>
+          <Y>3</Y>
+          <Z>90.00001</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <bool name="CanCollide">true</bool>
+        <bool name="CanQuery">true</bool>
+        <bool name="CanTouch">true</bool>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <bool name="CastShadow">true</bool>
+        <BinaryString name="ChildData">
+        </BinaryString>
+        <SharedString name="ChildData2">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
+        <string name="CollisionGroup">Default</string>
+        <int name="CollisionGroupId">0</int>
+        <Color3uint8 name="Color3uint8">12360541</Color3uint8>
+        <int name="ComponentIndex">-1</int>
+        <PhysicalProperties name="CustomPhysicalProperties">
+          <CustomPhysics>false</CustomPhysics>
+        </PhysicalProperties>
+        <bool name="EnableFluidForces">true</bool>
+        <token name="FluidFidelityInternal">0</token>
+        <token name="FormFactor">3</token>
+        <float name="FrontParamA">-0.5</float>
+        <float name="FrontParamB">0.5</float>
+        <token name="FrontSurface">0</token>
+        <token name="FrontSurfaceInput">0</token>
+        <UniqueId name="HistoryId">13a1df3d9f12f1ec08f15c8a0001e7a5</UniqueId>
+        <bool name="InertiaMigrated">true</bool>
+        <Vector3 name="InitialSize">
+          <X>8.000008</X>
+          <Y>8</Y>
+          <Z>8</Z>
+        </Vector3>
+        <float name="LeftParamA">-0.5</float>
+        <float name="LeftParamB">0.5</float>
+        <token name="LeftSurface">0</token>
+        <token name="LeftSurfaceInput">0</token>
+        <bool name="Locked">false</bool>
+        <bool name="Massless">false</bool>
+        <token name="Material">1568</token>
+        <string name="MaterialVariantSerialized"></string>
+        <BinaryString name="MeshData">
+        </BinaryString>
+        <SharedString name="MeshData2">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
+        <bool name="OffCentered">false</bool>
+        <SharedString name="PhysicalConfigData">SBZHwXqUtelspCwUANjdOg==</SharedString>
+        <BinaryString name="PhysicsData">
+        </BinaryString>
+        <CoordinateFrame name="PivotOffset">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <float name="Reflectance">0.1</float>
+        <token name="RenderFidelity">1</token>
+        <float name="RightParamA">-0.5</float>
+        <float name="RightParamB">0.5</float>
+        <token name="RightSurface">0</token>
+        <token name="RightSurfaceInput">0</token>
+        <int name="RootPriority">0</int>
+        <Vector3 name="RotVelocity">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+        </Vector3>
+        <bool name="DefinesCapabilities">false</bool>
+        <Vector3 name="size">
+          <X>6</X>
+          <Y>6</Y>
+          <Z>6</Z>
+        </Vector3>
+        <float name="SmoothingAngle">0</float>
+        <NetAssetRef name="SolidMeshHolder">rxNJufX5oaagQE3qNtzJSQ==</NetAssetRef>
+        <int64 name="SourceAssetId">5229340868</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <float name="TopParamA">-0.5</float>
+        <float name="TopParamB">0.5</float>
+        <token name="TopSurface">0</token>
+        <token name="TopSurfaceInput">0</token>
+        <float name="Transparency">0</float>
+        <UniqueId name="UniqueId">35bd9c6f327d77ef0a48fb3700005e74</UniqueId>
+        <Vector3 name="UnscaledCofm">
+          <X>0.013222432</X>
+          <Y>0.017302992</Y>
+          <Z>-0.024698101</Z>
+        </Vector3>
+        <Vector3 name="UnscaledVolInertiaDiags">
+          <X>2311.6072</X>
+          <Y>2325.0713</Y>
+          <Z>2296.4448</Z>
+        </Vector3>
+        <Vector3 name="UnscaledVolInertiaOffDiags">
+          <X>-9.572746</X>
+          <Y>14.330158</Y>
+          <Z>2.3847694</Z>
+        </Vector3>
+        <float name="UnscaledVolume">194.22325</float>
+        <bool name="UsePartColor">false</bool>
+        <Vector3 name="Velocity">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+        </Vector3>
+      </Properties>
+      <Item class="Decal" referent="3">
+        <Properties>
+          <string name="Name">Decal</string>
+          <BinaryString name="AttributesSerialize"></BinaryString>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <Color3 name="Color3">
+            <R>1</R>
+            <G>1</G>
+            <B>1</B>
+          </Color3>
+          <token name="Face">3</token>
+          <UniqueId name="HistoryId">13a1df3d9f12f1ec08f15c8a0001e7a6</UniqueId>
+          <Content name="MetalnessMapContent">
+            <null>
+            </null>
+          </Content>
+          <Content name="NormalMapContent">
+            <null>
+            </null>
+          </Content>
+          <float name="Rotation">0</float>
+          <Content name="RoughnessMapContent">
+            <null>
+            </null>
+          </Content>
+          <bool name="DefinesCapabilities">false</bool>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <Content name="TextureContent">
+            <uri>http://www.roblox.com/asset/?id=63143443</uri>
+          </Content>
+          <ContentId name="TexturePack">
+            <null>
+            </null>
+          </ContentId>
+          <string name="TexturePackMetadata"></string>
+          <float name="Transparency">0.8</float>
+          <Vector2 name="UVOffset">
+            <X>0</X>
+            <Y>0</Y>
+          </Vector2>
+          <Vector2 name="UVScale">
+            <X>1</X>
+            <Y>1</Y>
+          </Vector2>
+          <UniqueId name="UniqueId">35bd9c6f327d77ef0a48fb3700005e75</UniqueId>
+          <int name="ZIndex">1</int>
+        </Properties>
+      </Item>
+      <Item class="Decal" referent="4">
+        <Properties>
+          <string name="Name">Decal</string>
+          <BinaryString name="AttributesSerialize"></BinaryString>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <Color3 name="Color3">
+            <R>1</R>
+            <G>1</G>
+            <B>1</B>
+          </Color3>
+          <token name="Face">1</token>
+          <UniqueId name="HistoryId">13a1df3d9f12f1ec08f15c8a0001e7a7</UniqueId>
+          <Content name="MetalnessMapContent">
+            <null>
+            </null>
+          </Content>
+          <Content name="NormalMapContent">
+            <null>
+            </null>
+          </Content>
+          <float name="Rotation">0</float>
+          <Content name="RoughnessMapContent">
+            <null>
+            </null>
+          </Content>
+          <bool name="DefinesCapabilities">false</bool>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <Content name="TextureContent">
+            <uri>http://www.roblox.com/asset/?id=63143443</uri>
+          </Content>
+          <ContentId name="TexturePack">
+            <null>
+            </null>
+          </ContentId>
+          <string name="TexturePackMetadata"></string>
+          <float name="Transparency">0.8</float>
+          <Vector2 name="UVOffset">
+            <X>0</X>
+            <Y>0</Y>
+          </Vector2>
+          <Vector2 name="UVScale">
+            <X>1</X>
+            <Y>1</Y>
+          </Vector2>
+          <UniqueId name="UniqueId">35bd9c6f327d77ef0a48fb3700005e76</UniqueId>
+          <int name="ZIndex">1</int>
+        </Properties>
+      </Item>
+      <Item class="Decal" referent="5">
+        <Properties>
+          <string name="Name">Decal</string>
+          <BinaryString name="AttributesSerialize"></BinaryString>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <Color3 name="Color3">
+            <R>1</R>
+            <G>1</G>
+            <B>1</B>
+          </Color3>
+          <token name="Face">4</token>
+          <UniqueId name="HistoryId">13a1df3d9f12f1ec08f15c8a0001e7a8</UniqueId>
+          <Content name="MetalnessMapContent">
+            <null>
+            </null>
+          </Content>
+          <Content name="NormalMapContent">
+            <null>
+            </null>
+          </Content>
+          <float name="Rotation">0</float>
+          <Content name="RoughnessMapContent">
+            <null>
+            </null>
+          </Content>
+          <bool name="DefinesCapabilities">false</bool>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <Content name="TextureContent">
+            <uri>http://www.roblox.com/asset/?id=63143443</uri>
+          </Content>
+          <ContentId name="TexturePack">
+            <null>
+            </null>
+          </ContentId>
+          <string name="TexturePackMetadata"></string>
+          <float name="Transparency">0.8</float>
+          <Vector2 name="UVOffset">
+            <X>0</X>
+            <Y>0</Y>
+          </Vector2>
+          <Vector2 name="UVScale">
+            <X>1</X>
+            <Y>1</Y>
+          </Vector2>
+          <UniqueId name="UniqueId">35bd9c6f327d77ef0a48fb3700005e77</UniqueId>
+          <int name="ZIndex">1</int>
+        </Properties>
+      </Item>
+      <Item class="Decal" referent="6">
+        <Properties>
+          <string name="Name">Decal</string>
+          <BinaryString name="AttributesSerialize"></BinaryString>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <Color3 name="Color3">
+            <R>1</R>
+            <G>1</G>
+            <B>1</B>
+          </Color3>
+          <token name="Face">5</token>
+          <UniqueId name="HistoryId">13a1df3d9f12f1ec08f15c8a0001e7a9</UniqueId>
+          <Content name="MetalnessMapContent">
+            <null>
+            </null>
+          </Content>
+          <Content name="NormalMapContent">
+            <null>
+            </null>
+          </Content>
+          <float name="Rotation">0</float>
+          <Content name="RoughnessMapContent">
+            <null>
+            </null>
+          </Content>
+          <bool name="DefinesCapabilities">false</bool>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <Content name="TextureContent">
+            <uri>http://www.roblox.com/asset/?id=63143443</uri>
+          </Content>
+          <ContentId name="TexturePack">
+            <null>
+            </null>
+          </ContentId>
+          <string name="TexturePackMetadata"></string>
+          <float name="Transparency">0.8</float>
+          <Vector2 name="UVOffset">
+            <X>0</X>
+            <Y>0</Y>
+          </Vector2>
+          <Vector2 name="UVScale">
+            <X>1</X>
+            <Y>1</Y>
+          </Vector2>
+          <UniqueId name="UniqueId">35bd9c6f327d77ef0a48fb3700005e78</UniqueId>
+          <int name="ZIndex">1</int>
+        </Properties>
+      </Item>
+      <Item class="Decal" referent="7">
+        <Properties>
+          <string name="Name">Decal</string>
+          <BinaryString name="AttributesSerialize"></BinaryString>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <Color3 name="Color3">
+            <R>1</R>
+            <G>1</G>
+            <B>1</B>
+          </Color3>
+          <token name="Face">0</token>
+          <UniqueId name="HistoryId">13a1df3d9f12f1ec08f15c8a0001e7aa</UniqueId>
+          <Content name="MetalnessMapContent">
+            <null>
+            </null>
+          </Content>
+          <Content name="NormalMapContent">
+            <null>
+            </null>
+          </Content>
+          <float name="Rotation">0</float>
+          <Content name="RoughnessMapContent">
+            <null>
+            </null>
+          </Content>
+          <bool name="DefinesCapabilities">false</bool>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <Content name="TextureContent">
+            <uri>http://www.roblox.com/asset/?id=63143443</uri>
+          </Content>
+          <ContentId name="TexturePack">
+            <null>
+            </null>
+          </ContentId>
+          <string name="TexturePackMetadata"></string>
+          <float name="Transparency">0.8</float>
+          <Vector2 name="UVOffset">
+            <X>0</X>
+            <Y>0</Y>
+          </Vector2>
+          <Vector2 name="UVScale">
+            <X>1</X>
+            <Y>1</Y>
+          </Vector2>
+          <UniqueId name="UniqueId">35bd9c6f327d77ef0a48fb3700005e79</UniqueId>
+          <int name="ZIndex">1</int>
+        </Properties>
+      </Item>
+      <Item class="Decal" referent="8">
+        <Properties>
+          <string name="Name">Decal</string>
+          <BinaryString name="AttributesSerialize"></BinaryString>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <Color3 name="Color3">
+            <R>1</R>
+            <G>1</G>
+            <B>1</B>
+          </Color3>
+          <token name="Face">2</token>
+          <UniqueId name="HistoryId">13a1df3d9f12f1ec08f15c8a0001e7ab</UniqueId>
+          <Content name="MetalnessMapContent">
+            <null>
+            </null>
+          </Content>
+          <Content name="NormalMapContent">
+            <null>
+            </null>
+          </Content>
+          <float name="Rotation">0</float>
+          <Content name="RoughnessMapContent">
+            <null>
+            </null>
+          </Content>
+          <bool name="DefinesCapabilities">false</bool>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <Content name="TextureContent">
+            <uri>http://www.roblox.com/asset/?id=63143443</uri>
+          </Content>
+          <ContentId name="TexturePack">
+            <null>
+            </null>
+          </ContentId>
+          <string name="TexturePackMetadata"></string>
+          <float name="Transparency">0.8</float>
+          <Vector2 name="UVOffset">
+            <X>0</X>
+            <Y>0</Y>
+          </Vector2>
+          <Vector2 name="UVScale">
+            <X>1</X>
+            <Y>1</Y>
+          </Vector2>
+          <UniqueId name="UniqueId">35bd9c6f327d77ef0a48fb3700005e7a</UniqueId>
+          <int name="ZIndex">1</int>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <SharedStrings>
+    <SharedString md5="SBZHwXqUtelspCwUANjdOg==">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</SharedString>
+    <SharedString md5="rxNJufX5oaagQE3qNtzJSQ=="></SharedString>
+  </SharedStrings>
+</roblox>

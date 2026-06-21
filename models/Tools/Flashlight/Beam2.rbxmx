@@ -1,0 +1,163 @@
+<roblox version="4">
+  <Item class="Part" referent="0">
+    <Properties>
+      <string name="Name">Beam2</string>
+      <bool name="Anchored">true</bool>
+      <BinaryString name="AttributesSerialize"></BinaryString>
+      <bool name="AudioCanCollide">true</bool>
+      <float name="BackParamA">-0.5</float>
+      <float name="BackParamB">0.5</float>
+      <token name="BackSurface">0</token>
+      <token name="BackSurfaceInput">0</token>
+      <float name="BottomParamA">-0.5</float>
+      <float name="BottomParamB">0.5</float>
+      <token name="BottomSurface">0</token>
+      <token name="BottomSurfaceInput">0</token>
+      <CoordinateFrame name="CFrame">
+        <X>433.9682</X>
+        <Y>1.3217607</Y>
+        <Z>60.00862</Z>
+        <R00>0.008061365</R00>
+        <R01>0.081112586</R01>
+        <R02>-0.99667233</R02>
+        <R10>-0.000656037</R10>
+        <R11>0.99670494</R11>
+        <R12>0.08110993</R12>
+        <R20>0.9999673</R20>
+        <R21>-0.0000000029460947</R21>
+        <R22>0.008088016</R22>
+      </CoordinateFrame>
+      <bool name="CanCollide">false</bool>
+      <bool name="CanQuery">true</bool>
+      <bool name="CanTouch">true</bool>
+      <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+      <bool name="CastShadow">true</bool>
+      <string name="CollisionGroup">Default</string>
+      <int name="CollisionGroupId">0</int>
+      <Color3uint8 name="Color3uint8">10724005</Color3uint8>
+      <PhysicalProperties name="CustomPhysicalProperties">
+        <CustomPhysics>false</CustomPhysics>
+      </PhysicalProperties>
+      <bool name="EnableFluidForces">true</bool>
+      <token name="formFactorRaw">1</token>
+      <float name="FrontParamA">-0.5</float>
+      <float name="FrontParamB">0.5</float>
+      <token name="FrontSurface">0</token>
+      <token name="FrontSurfaceInput">0</token>
+      <UniqueId name="HistoryId">32767ca95bea1581085c00db0002ac96</UniqueId>
+      <float name="LeftParamA">-0.5</float>
+      <float name="LeftParamB">0.5</float>
+      <token name="LeftSurface">0</token>
+      <token name="LeftSurfaceInput">0</token>
+      <bool name="Locked">false</bool>
+      <bool name="Massless">false</bool>
+      <token name="Material">256</token>
+      <string name="MaterialVariantSerialized"></string>
+      <CoordinateFrame name="PivotOffset">
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+        <R00>1</R00>
+        <R01>0</R01>
+        <R02>0</R02>
+        <R10>0</R10>
+        <R11>1</R11>
+        <R12>0</R12>
+        <R20>0</R20>
+        <R21>0</R21>
+        <R22>1</R22>
+      </CoordinateFrame>
+      <float name="Reflectance">0</float>
+      <float name="RightParamA">-0.5</float>
+      <float name="RightParamB">0.5</float>
+      <token name="RightSurface">0</token>
+      <token name="RightSurfaceInput">0</token>
+      <int name="RootPriority">0</int>
+      <Vector3 name="RotVelocity">
+        <X>1</X>
+        <Y>1</Y>
+        <Z>1</Z>
+      </Vector3>
+      <bool name="DefinesCapabilities">false</bool>
+      <token name="shape">1</token>
+      <Vector3 name="size">
+        <X>0.25</X>
+        <Y>0.25</Y>
+        <Z>0.25</Z>
+      </Vector3>
+      <int64 name="SourceAssetId">-1</int64>
+      <BinaryString name="Tags"></BinaryString>
+      <float name="TopParamA">-0.5</float>
+      <float name="TopParamB">0.5</float>
+      <token name="TopSurface">0</token>
+      <token name="TopSurfaceInput">0</token>
+      <float name="Transparency">1</float>
+      <UniqueId name="UniqueId">35bd9c6f327d77ef0a48fb370000725d</UniqueId>
+      <Vector3 name="Velocity">
+        <X>-1.0685406</X>
+        <Y>1.6196747</Y>
+        <Z>-0.5511341</Z>
+      </Vector3>
+    </Properties>
+    <Item class="Attachment" referent="1">
+      <Properties>
+        <string name="Name">Attachment</string>
+        <BinaryString name="AttributesSerialize">AQAAAAcAAABSb2pvX0lkAiAAAAAzNWJkOWM2ZjMyN2Q3N2VmMGE0OGZiMzcwMDAwNzI1ZQ==</BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>-0.07655239</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <UniqueId name="HistoryId">32767ca95bea1581085c00db0002ac97</UniqueId>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <UniqueId name="UniqueId">35bd9c6f327d77ef0a48fb370000725e</UniqueId>
+        <bool name="Visible">false</bool>
+      </Properties>
+    </Item>
+    <Item class="Beam" referent="2">
+      <Properties>
+        <string name="Name">light</string>
+        <Ref name="Attachment0">1</Ref>
+        <Ref name="Attachment1">3</Ref>
+        <BinaryString name="AttributesSerialize">AgAAABcAAABSb2pvX1RhcmdldF9BdHRhY2htZW50MAIgAAAAMzViZDljNmYzMjdkNzdlZjBhNDhmYjM3MDAwMDcyNWUXAAAAUm9qb19UYXJnZXRfQXR0YWNobWVudDECIAAAADM1YmQ5YzZmMzI3ZDc3ZWYwYTQ4ZmIzNzAwMDA3MjYx</BinaryString>
+        <float name="Brightness">1</float>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <ColorSequence name="Color">0 0.87058824 0.90588236 1 0 1 0.87058824 0.90588236 1 0 </ColorSequence>
+        <float name="CurveSize0">0</float>
+        <float name="CurveSize1">0</float>
+        <bool name="Enabled">true</bool>
+        <bool name="FaceCamera">true</bool>
+        <UniqueId name="HistoryId">32767ca95bea1581085c00db0002ac98</UniqueId>
+        <float name="LightEmission">0</float>
+        <float name="LightInfluence">0</float>
+        <bool name="DefinesCapabilities">false</bool>
+        <int name="Segments">100</int>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags">RWZmZWN0</BinaryString>
+        <ContentId name="Texture">
+          <url>rbxassetid://901813002</url>
+        </ContentId>
+        <float name="TextureLength">19</float>
+        <token name="TextureMode">1</token>
+        <float name="TextureSpeed">0</float>
+        <NumberSequence name="Transparency">0 0.5 0 1 0.5 0 </NumberSequence>
+        <UniqueId name="UniqueId">35bd9c6f327d77ef0a48fb370000725f</UniqueId>
+        <float name="Width0">0.5</float>
+        <float name="Width1">10</float>
+        <float name="ZOffset">0</float>
+      </Properties>
+    </Item>
+  </Item>
+</roblox>
