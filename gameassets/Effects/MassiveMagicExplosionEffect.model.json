@@ -1,107 +1,82 @@
 {
-  "className": "ParticleEmitter",
-  "properties": {
-    "LockedToPart": true,
-    "Size": {
-      "NumberSequence": {
-        "keypoints": [
-          {
-            "time": 0.0,
-            "value": 100.0,
-            "envelope": 0.0
-          },
-          {
-            "time": 1.0,
-            "value": 100.0,
-            "envelope": 0.0
-          }
-        ]
-      }
-    },
-    "Drag": 20.0,
-    "Speed": {
-      "NumberRange": [
-        0.0,
-        0.0
-      ]
-    },
-    "SpreadAngle": [
-      180.0,
-      180.0
-    ],
-    "Color": {
-      "ColorSequence": {
-        "keypoints": [
-          {
-            "time": 0.0,
-            "color": [
-              0.003921569,
-              0.27058825,
-              1.0
-            ]
-          },
-          {
-            "time": 1.0,
-            "color": [
-              0.003921569,
-              0.27058825,
-              1.0
-            ]
-          }
-        ]
-      }
-    },
-    "FlipbookLayout": "Grid4x4",
-    "LightEmission": 1.0,
-    "ZOffset": 1.0,
-    "Rate": 5.0,
-    "FlipbookBlendFrames": {
-      "Bool": true
-    },
-    "FlipbookMode": "OneShot",
-    "Lifetime": {
-      "NumberRange": [
-        0.5,
-        1.0
-      ]
-    },
-    "Texture": "http://www.roblox.com/asset/?id=12996605668",
-    "Transparency": {
-      "NumberSequence": {
-        "keypoints": [
-          {
-            "time": 0.0,
-            "value": 1.0,
-            "envelope": 0.0
-          },
-          {
-            "time": 0.25,
-            "value": 0.0,
-            "envelope": 0.0
-          },
-          {
-            "time": 1.0,
-            "value": 1.0,
-            "envelope": 0.0
-          }
-        ]
-      }
-    },
-    "Brightness": 5.0,
-    "RotSpeed": {
-      "NumberRange": [
-        -45.0,
-        45.0
-      ]
-    },
-    "Rotation": {
-      "NumberRange": [
-        -360.0,
-        360.0
-      ]
-    },
-    "Tags": [
-      "Effect"
-    ]
-  }
+    "className": "ParticleEmitter",
+    "properties": {
+        "LockedToPart": true,
+        "Size": {
+            "NumberSequence": {
+                "keypoints": [
+                    {
+                        "time": 0.0,
+                        "value": 100.0,
+                        "envelope": 0.0
+                    },
+                    {
+                        "time": 1.0,
+                        "value": 100.0,
+                        "envelope": 0.0
+                    }
+                ]
+            }
+        },
+        "Drag": 20.0,
+        "Speed": {
+            "NumberRange": [0.0, 0.0]
+        },
+        "SpreadAngle": [180.0, 180.0],
+        "Color": {
+            "ColorSequence": {
+                "keypoints": [
+                    {
+                        "time": 0.0,
+                        "color": [0.003921569, 0.27058825, 1.0]
+                    },
+                    {
+                        "time": 1.0,
+                        "color": [0.003921569, 0.27058825, 1.0]
+                    }
+                ]
+            }
+        },
+        "FlipbookLayout": "Grid4x4",
+        "LightEmission": 1.0,
+        "ZOffset": 1.0,
+        "Rate": 5.0,
+        "FlipbookBlendFrames": {
+            "Bool": true
+        },
+        "FlipbookMode": "OneShot",
+        "Lifetime": {
+            "NumberRange": [0.5, 1.0]
+        },
+        "Texture": "http://www.roblox.com/asset/?id=12996605668",
+        "Transparency": {
+            "NumberSequence": {
+                "keypoints": [
+                    {
+                        "time": 0.0,
+                        "value": 1.0,
+                        "envelope": 0.0
+                    },
+                    {
+                        "time": 0.25,
+                        "value": 0.0,
+                        "envelope": 0.0
+                    },
+                    {
+                        "time": 1.0,
+                        "value": 1.0,
+                        "envelope": 0.0
+                    }
+                ]
+            }
+        },
+        "Brightness": 5.0,
+        "RotSpeed": {
+            "NumberRange": [-45.0, 45.0]
+        },
+        "Rotation": {
+            "NumberRange": [-360.0, 360.0]
+        },
+        "Tags": ["Effect"]
+    }
 }

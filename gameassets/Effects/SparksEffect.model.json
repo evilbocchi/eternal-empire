@@ -1,125 +1,101 @@
 {
-  "className": "ParticleEmitter",
-  "properties": {
-    "LockedToPart": true,
-    "Size": {
-      "NumberSequence": {
-        "keypoints": [
-          {
-            "time": 0.0,
-            "value": 0.0,
-            "envelope": 0.0
-          },
-          {
-            "time": 0.20545746,
-            "value": 0.0,
-            "envelope": 0.0
-          },
-          {
-            "time": 0.28054863,
-            "value": 5.7763977,
-            "envelope": 0.313
-          },
-          {
-            "time": 1.0,
-            "value": 0.0,
-            "envelope": 0.0
-          }
-        ]
-      }
+    "className": "ParticleEmitter",
+    "properties": {
+        "LockedToPart": true,
+        "Size": {
+            "NumberSequence": {
+                "keypoints": [
+                    {
+                        "time": 0.0,
+                        "value": 0.0,
+                        "envelope": 0.0
+                    },
+                    {
+                        "time": 0.20545746,
+                        "value": 0.0,
+                        "envelope": 0.0
+                    },
+                    {
+                        "time": 0.28054863,
+                        "value": 5.7763977,
+                        "envelope": 0.313
+                    },
+                    {
+                        "time": 1.0,
+                        "value": 0.0,
+                        "envelope": 0.0
+                    }
+                ]
+            }
+        },
+        "Drag": 3.0,
+        "Speed": {
+            "NumberRange": [10.0, 20.0]
+        },
+        "SpreadAngle": [180.0, -180.0],
+        "Color": {
+            "ColorSequence": {
+                "keypoints": [
+                    {
+                        "time": 0.0,
+                        "color": [1.0, 1.0, 0.49803922]
+                    },
+                    {
+                        "time": 1.0,
+                        "color": [1.0, 1.0, 0.49803922]
+                    }
+                ]
+            }
+        },
+        "LightEmission": 0.6000000238418579,
+        "Rate": 10.0,
+        "FlipbookBlendFrames": {
+            "Bool": true
+        },
+        "Lifetime": {
+            "NumberRange": [0.3, 1.0]
+        },
+        "Texture": "rbxassetid://8114157061",
+        "Transparency": {
+            "NumberSequence": {
+                "keypoints": [
+                    {
+                        "time": 0.0,
+                        "value": 1.0,
+                        "envelope": 0.0
+                    },
+                    {
+                        "time": 0.19743179,
+                        "value": 0.0,
+                        "envelope": 0.0
+                    },
+                    {
+                        "time": 0.55136436,
+                        "value": 0.10624999,
+                        "envelope": 0.0
+                    },
+                    {
+                        "time": 0.78972715,
+                        "value": 0.91875,
+                        "envelope": 0.0
+                    },
+                    {
+                        "time": 1.0,
+                        "value": 1.0,
+                        "envelope": 0.0
+                    }
+                ]
+            }
+        },
+        "Brightness": 4.784999847412109,
+        "Orientation": "VelocityParallel",
+        "Acceleration": [0.0, -5.0, 0.0],
+        "Rotation": {
+            "NumberRange": [90.0, 90.0]
+        },
+        "EmissionDirection": "Front"
     },
-    "Drag": 3.0,
-    "Speed": {
-      "NumberRange": [
-        10.0,
-        20.0
-      ]
-    },
-    "SpreadAngle": [
-      180.0,
-      -180.0
-    ],
-    "Color": {
-      "ColorSequence": {
-        "keypoints": [
-          {
-            "time": 0.0,
-            "color": [
-              1.0,
-              1.0,
-              0.49803922
-            ]
-          },
-          {
-            "time": 1.0,
-            "color": [
-              1.0,
-              1.0,
-              0.49803922
-            ]
-          }
-        ]
-      }
-    },
-    "LightEmission": 0.6000000238418579,
-    "Rate": 10.0,
-    "FlipbookBlendFrames": {
-      "Bool": true
-    },
-    "Lifetime": {
-      "NumberRange": [
-        0.3,
-        1.0
-      ]
-    },
-    "Texture": "rbxassetid://8114157061",
-    "Transparency": {
-      "NumberSequence": {
-        "keypoints": [
-          {
-            "time": 0.0,
-            "value": 1.0,
-            "envelope": 0.0
-          },
-          {
-            "time": 0.19743179,
-            "value": 0.0,
-            "envelope": 0.0
-          },
-          {
-            "time": 0.55136436,
-            "value": 0.10624999,
-            "envelope": 0.0
-          },
-          {
-            "time": 0.78972715,
-            "value": 0.91875,
-            "envelope": 0.0
-          },
-          {
-            "time": 1.0,
-            "value": 1.0,
-            "envelope": 0.0
-          }
-        ]
-      }
-    },
-    "Brightness": 4.784999847412109,
-    "Orientation": "VelocityParallel",
-    "Acceleration": [
-      0.0,
-      -5.0,
-      0.0
-    ],
-    "Rotation": {
-      "NumberRange": [
-        90.0,
-        90.0
-      ]
-    },
-    "EmissionDirection": "Front"
-  },
-  "attributes": {
-    "EmitCount": 30.0
-  }
+    "attributes": {
+        "EmitCount": 30.0
+    }
 }

@@ -1,11 +1,11 @@
 {
-  "properties": {
-    "PlaybackSpeed": 2.5,
-    "AudioContent": "rbxassetid://5416502002",
-    "AcousticSimulationEnabled": {
-      "Bool": true
+    "properties": {
+        "PlaybackSpeed": 2.5,
+        "AudioContent": "rbxassetid://5416502002",
+        "AcousticSimulationEnabled": {
+            "Bool": true
+        },
+        "SourceAssetId": 5416502002.0
     },
-    "SourceAssetId": 5416502002.0
-  },
-  "className": "Sound"
+    "className": "Sound"
 }

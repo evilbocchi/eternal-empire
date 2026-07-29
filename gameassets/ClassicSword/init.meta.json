@@ -1,47 +1,18 @@
 {
-  "properties": {
-    "SourceAssetId": 47433.0,
-    "TextureContent": "rbxasset://Textures/Sword128.png",
-    "WorldPivotData": {
-      "OptionalCFrame": {
-        "position": [
-          -37.097275,
-          126.88732,
-          26.797482
-        ],
-        "orientation": [
-          [
-            0.09104404,
-            -0.88109946,
-            0.46408436
-          ],
-          [
-            0.5370117,
-            0.43589485,
-            0.7222291
-          ],
-          [
-            -0.83864856,
-            0.18346372,
-            0.5128456
-          ]
-        ]
-      }
+    "properties": {
+        "SourceAssetId": 47433.0,
+        "TextureContent": "rbxasset://Textures/Sword128.png",
+        "WorldPivotData": {
+            "OptionalCFrame": {
+                "position": [-37.097275, 126.88732, 26.797482],
+                "orientation": [
+                    [0.09104404, -0.88109946, 0.46408436],
+                    [0.5370117, 0.43589485, 0.7222291],
+                    [-0.83864856, 0.18346372, 0.5128456]
+                ]
+            }
+        },
+        "Grip": [0.0, 0.0, -1.5, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
     },
-    "Grip": [
-      0.0,
-      0.0,
-      -1.5,
-      0.0,
-      0.0,
-      1.0,
-      1.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      0.0
-    ]
-  },
-  "className": "Tool"
+    "className": "Tool"
 }

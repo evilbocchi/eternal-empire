@@ -1,5 +1,4 @@
 {
-    "typescript.tsdk": "node_modules/typescript/lib",
     "files.eol": "\n",
     "[typescript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -11,10 +10,18 @@
     },
     "eslint.run": "onType",
     "eslint.format.enable": true,
-    "typescript.format.semicolons": "insert",
-    "typescript.experimental.useTsgo": false,
     "stylua.targetReleaseVersion": "latest",
     "jest.jestCommandLine": "npm test --",
     "jest.useJest30": false,
-    "go.toolsEnvVars": {}
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "include": true,
+        ".infh_*.project.json": true,
+        "flamework.build": true,
+        "sourcemap.json": true
+    }
 }

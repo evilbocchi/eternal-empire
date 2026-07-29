@@ -2,9 +2,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "npm: install",
+            "label": "bun: install",
             "type": "shell",
-            "command": "npm install",
+            "command": "bun install",
             "problemMatcher": [],
             "presentation": {
                 "reveal": "never",
@@ -12,11 +12,11 @@
             }
         },
         {
-            "label": "npm: dev",
-            "dependsOn": "npm: install",
+            "label": "bun: dev",
+            "dependsOn": "bun: install",
             "dependsOrder": "sequence",
             "type": "shell",
-            "command": "npm run dev",
+            "command": "bun run dev",
             "isBackground": true,
             "problemMatcher": [
                 "$tsc-watch",
@@ -41,11 +41,11 @@
             }
         },
         {
-            "label": "npm: plugin dev",
-            "dependsOn": "npm: install",
+            "label": "bun: plugin dev",
+            "dependsOn": "bun: install",
             "dependsOrder": "sequence",
             "type": "shell",
-            "command": "npm run dev:plugin",
+            "command": "bun run dev:plugin",
             "isBackground": true,
             "problemMatcher": [],
             "presentation": {

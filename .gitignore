@@ -14,3 +14,5 @@ upstream.rbxl
 *.lock
 *.log
 !bun.lock
+sourcemap.json
+.infh_*.project.json
