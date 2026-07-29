@@ -17,7 +17,7 @@ const IS_EDIT = eater.isEdit;
  * @returns The original object for convenience
  */
 export default function eat<
-    O extends keyof U extends never
+    O extends (keyof U extends never
         ? object
         : I extends keyof U
           ? U[I]
@@ -25,7 +25,7 @@ export default function eat<
             ? Callback | thread
             : M extends undefined
               ? RBXScriptConnection | { Destroy(): void }
-              : object,
+              : object),
     M extends undefined | ((this: O) => void) | ((_: O) => void) | ExtractKeys<O, () => void> | true,
     I extends keyof U | undefined = undefined,
     U extends object | void = void,

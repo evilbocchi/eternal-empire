@@ -38,8 +38,7 @@ export default class ObbyUpgrader extends ItemTrait {
     static onClientLoad(model: Model, obbyUpgrader: ObbyUpgrader) {
         const obbyPointsGuiPart = model.WaitForChild("ObbyPointsGuiPart") as BasePart;
         const label = obbyPointsGuiPart.FindFirstChildOfClass("SurfaceGui")?.FindFirstChild("TextLabel") as
-            | TextLabel
-            | undefined;
+            TextLabel | undefined;
         if (label === undefined) throw "ObbyPointsGuiPart does not have a TextLabel in its SurfaceGui";
         const cleanup = simpleInterval(() => {
             label.Text = `OBBY POINTS: ${new OnoeNum(Packets.balance.get().get("Obby Points") ?? 0).toString()}`;

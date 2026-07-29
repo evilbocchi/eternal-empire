@@ -35,10 +35,7 @@ export default class Leaderstats {
     static setLeaderstat(player: Player, leaderstat: string, value: string | number) {
         const leaderstats = this.getLeaderstats(player);
         let statValueObject = leaderstats.FindFirstChild(leaderstat) as
-            | IntValue
-            | NumberValue
-            | StringValue
-            | undefined;
+            IntValue | NumberValue | StringValue | undefined;
         if (statValueObject === undefined) {
             statValueObject = new Instance(
                 typeIs(value, "number") ? ((value as number) % 1 > 0 ? "NumberValue" : "IntValue") : "StringValue",
