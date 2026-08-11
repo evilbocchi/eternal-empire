@@ -4,7 +4,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "jestrbx --place sandbox/local.rbxl",
+        "test": "jestrbx --place out/local.rbxl",
         "test:plugin": "bun test plugin/**/*.test.js",
         "lint": "eslint src --no-error-on-unmatched-pattern",
         "format": "prettier --write .",
@@ -13,7 +13,6 @@
         "build:src": "rbxtsc",
         "build:place": "rojo build --output=out/local.rbxl",
         "build": "bun run build:src && bun run build:place",
-        "open": "bun sandbox/open.js",
         "docs": "typedoc && bun test/runProgressionEstimate.js",
         "dev": "tsc-watch --compileCommand rbxtsc --onSuccess \"bun run build:place\" --onFirstSuccess \"rojo serve\"",
         "dev:plugin": "concurrently --prefix none \"cd ./plugin && rojo build --plugin ee-tooling.rbxmx --watch\" \"nodemon --watch ./plugin/live ./plugin/live/index.js\""
