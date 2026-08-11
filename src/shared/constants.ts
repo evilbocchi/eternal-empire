@@ -36,7 +36,7 @@ export function getNameFromUserId(userId: number | undefined) {
     if (name !== undefined) {
         return name;
     }
-    const [success, value] = pcall(() => Players.GetNameFromUserIdAsync(userId));
+    const [success, value] = pcall(() => Players.GetNameFromUserIdAsync(User.fromId(userId)));
     if (!success) {
         return "no name";
     }

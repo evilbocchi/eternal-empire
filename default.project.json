@@ -25,6 +25,12 @@
         },
         "ReplicatedStorage": {
             "$className": "ReplicatedStorage",
+            "Assets": {
+                "$path": "gameassets"
+            },
+            "ItemModels": {
+                "$path": "models"
+            },
             "rbxts_include": {
                 "$path": "include",
                 "$ignoreUnknownInstances": true,

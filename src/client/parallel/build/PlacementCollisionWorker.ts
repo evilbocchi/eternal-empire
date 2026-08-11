@@ -48,9 +48,9 @@ export function cancelCollision(jobId: number) {
 const requestConnection = BuildParallel.ACTOR.bindToMessage(REQUEST_CHANNEL, (message: CollisionRequestMessage) => {
     const { jobId, model } = message;
 
-    if (!IS_EDIT) {
-        task.desynchronize();
-    }
+    // if (!IS_EDIT) {
+    //     task.desynchronize();
+    // }
 
     // Send result back to main thread
     BuildParallel.ACTOR.sendMessage(RESULT_CHANNEL, {
@@ -58,9 +58,9 @@ const requestConnection = BuildParallel.ACTOR.bindToMessage(REQUEST_CHANNEL, (me
         colliding: ItemPlacement.isTouchingPlacedItem(model),
     } as CollisionResultMessage);
 
-    if (!IS_EDIT) {
-        task.synchronize();
-    }
+    // if (!IS_EDIT) {
+    //     task.synchronize();
+    // }
 });
 eat(requestConnection, "Disconnect");
 
