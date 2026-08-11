@@ -4,7 +4,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "jestrbx --place out/local.rbxl",
+        "test": "jestrbx --place out/sandbox.rbxl",
         "test:plugin": "bun test plugin/**/*.test.js",
         "lint": "eslint src --no-error-on-unmatched-pattern",
         "format": "prettier --write .",
