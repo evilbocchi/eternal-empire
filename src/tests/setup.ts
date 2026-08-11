@@ -117,7 +117,7 @@ jest.spyOn(jest.globalEnv, "print").mockImplementation((...args: unknown[]) => {
 beforeEach(() => {
     const existingNpcFolder = Workspace.FindFirstChild("NPCs") as Folder | undefined;
     if (existingNpcFolder === undefined) {
-        const npcFolder = new Instance("Folder") as Folder;
+        const npcFolder = new Instance("Folder");
         npcFolder.Name = "NPCs";
         npcFolder.Parent = Workspace;
     }

@@ -11,8 +11,9 @@
         "asset-sync": "rbxts-asset-sync --log-level=warn --output=src/shared/asset/AssetMap.ts",
         "asset-watch": "rbxts-asset-sync --watch --output=src/shared/asset/AssetMap.ts",
         "build:src": "rbxtsc",
-        "build:place": "rojo build --output=out/local.rbxl",
+        "build:place": "rojo build --output=out/local.rbxl && lune run src/sandbox/init.luau",
         "build": "bun run build:src && bun run build:place",
+        "sandbox": "bun src/sandbox/open.js",
         "docs": "typedoc && bun test/runProgressionEstimate.js",
         "dev": "tsc-watch --compileCommand rbxtsc --onSuccess \"bun run build:place\" --onFirstSuccess \"rojo serve\"",
         "dev:plugin": "concurrently --prefix none \"cd ./plugin && rojo build --plugin ee-tooling.rbxmx --watch\" \"nodemon --watch ./plugin/live ./plugin/live/index.js\""

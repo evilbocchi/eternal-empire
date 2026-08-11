@@ -43,6 +43,7 @@ export default [
     },
     {
         ignores: [
+            "src/sandbox/**",
             "out/**",
             "node_modules/**",
             "docsout/**",
