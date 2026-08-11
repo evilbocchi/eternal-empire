@@ -1,5 +1,5 @@
 {
-    "js/ts.tsdk.path": "./node_modules/typescript",
+    "js/ts.tsdk.path": "node_modules\\typescript\\lib",
     "files.eol": "\n",
     "[typescript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
