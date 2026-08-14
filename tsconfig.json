@@ -40,6 +40,9 @@
             },
             {
                 "transform": "rbxts-transformer-services"
+            },
+            {
+                "transform": "rbxts-transformer-instances"
             }
         ]
     },
