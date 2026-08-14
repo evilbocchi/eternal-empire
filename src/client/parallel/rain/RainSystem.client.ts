@@ -14,7 +14,7 @@ import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
 // Client Variables
 const debris = Workspace.WaitForChild("Terrain") as Terrain;
 const { rainHit, rainPuddle, rainSplash, rainTrail } = (() => {
-    const rainHit = new Instance("ParticleEmitter");
+    const rainHit = new ParticleEmitter();
     rainHit.Color = new ColorSequence([
         new ColorSequenceKeypoint(0, Color3.fromRGB(228, 240, 255)),
         new ColorSequenceKeypoint(1, Color3.fromRGB(228, 240, 255)),
@@ -43,7 +43,7 @@ const { rainHit, rainPuddle, rainSplash, rainTrail } = (() => {
         new NumberSequenceKeypoint(1, 1, 0),
     ]);
 
-    const rainPuddle = new Instance("ParticleEmitter");
+    const rainPuddle = new ParticleEmitter();
     rainPuddle.Color = new ColorSequence([
         new ColorSequenceKeypoint(0, Color3.fromRGB(228, 240, 255)),
         new ColorSequenceKeypoint(1, Color3.fromRGB(228, 240, 255)),
@@ -71,7 +71,7 @@ const { rainHit, rainPuddle, rainSplash, rainTrail } = (() => {
         new NumberSequenceKeypoint(1, 1, 0),
     ]);
 
-    const rainSplash = new Instance("ParticleEmitter");
+    const rainSplash = new ParticleEmitter();
     rainSplash.Color = new ColorSequence([
         new ColorSequenceKeypoint(0, Color3.fromRGB(228, 240, 255)),
         new ColorSequenceKeypoint(1, Color3.fromRGB(228, 240, 255)),
@@ -95,7 +95,7 @@ const { rainHit, rainPuddle, rainSplash, rainTrail } = (() => {
         new NumberSequenceKeypoint(1, 1, 0),
     ]);
 
-    const rainTrail = new Instance("ParticleEmitter");
+    const rainTrail = new ParticleEmitter();
     rainTrail.Color = new ColorSequence([
         new ColorSequenceKeypoint(0, Color3.fromRGB(229, 235, 255)),
         new ColorSequenceKeypoint(1, Color3.fromRGB(175, 186, 204)),
@@ -150,7 +150,7 @@ function getCurrentSettings() {
 
 // Weather Sound Effects
 const { rainSFX, rainIndoorEq, rainIndoorReverb } = (() => {
-    const Rain = new Instance("Sound");
+    const Rain = new Sound();
     Rain.Looped = true;
     Rain.Name = "Rain";
     Rain.SoundId = getAsset("assets/sounds/Rain.mp3");
@@ -158,14 +158,14 @@ const { rainSFX, rainIndoorEq, rainIndoorReverb } = (() => {
     Rain.Parent = IS_EDIT ? Environment.PluginWidget : ReplicatedStorage;
     eat(Rain, "Destroy");
 
-    const IndoorReverb = new Instance("ReverbSoundEffect");
+    const IndoorReverb = new ReverbSoundEffect();
     IndoorReverb.DecayTime = 0.5;
     IndoorReverb.DryLevel = 6;
     IndoorReverb.Name = "IndoorReverb";
     IndoorReverb.WetLevel = 0.1;
     IndoorReverb.Parent = Rain;
 
-    const IndoorEq = new Instance("EqualizerSoundEffect");
+    const IndoorEq = new EqualizerSoundEffect();
     IndoorEq.HighGain = -18;
     IndoorEq.LowGain = 0;
     IndoorEq.MidGain = 0;
@@ -276,7 +276,7 @@ function getRainAttachment(): CachedRainAttachment {
 
     // Create new attachment with particles if cache is not full
     if (cacheSize < maxCacheSize) {
-        const attachment = new Instance("Attachment");
+        const attachment = new Attachment();
         attachment.Parent = debris;
 
         const hit = rainHit.Clone();
@@ -315,7 +315,7 @@ function getPuddleAttachment(): CachedPuddleAttachment {
 
     // Create new attachment with particles if cache is not full
     if (puddleAttachmentCache.size() < maxCacheSize) {
-        const attachment = new Instance("Attachment");
+        const attachment = new Attachment();
         attachment.Parent = debris;
 
         const puddle = rainPuddle.Clone();

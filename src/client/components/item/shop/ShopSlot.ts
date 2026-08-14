@@ -53,12 +53,12 @@ function clampColorComponent(value: number) {
 }
 
 function applyStyling(parent: GuiObject, gridTransparency: number) {
-    const gradient = new Instance("UIGradient");
+    const gradient = new UIGradient();
     gradient.Color = BACKGROUND_GRADIENT;
     gradient.Rotation = 90;
     gradient.Parent = parent;
 
-    const vignette = new Instance("ImageLabel");
+    const vignette = new ImageLabel();
     vignette.Name = "Vignette";
     vignette.BackgroundTransparency = 1;
     vignette.Image = getAsset("assets/Vignette.png");
@@ -67,7 +67,7 @@ function applyStyling(parent: GuiObject, gridTransparency: number) {
     vignette.ZIndex = -4;
     vignette.Parent = parent;
 
-    const grid = new Instance("ImageLabel");
+    const grid = new ImageLabel();
     grid.Name = "Grid";
     grid.AnchorPoint = new Vector2(0.5, 0.5);
     grid.BackgroundTransparency = 1;
@@ -83,13 +83,13 @@ function applyStyling(parent: GuiObject, gridTransparency: number) {
 }
 
 function createStroke(parent: GuiObject, color: Color3) {
-    const stroke = new Instance("UIStroke");
+    const stroke = new UIStroke();
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border;
     stroke.Color = color;
     stroke.Thickness = 2;
     stroke.Parent = parent;
 
-    const strokeGradient = new Instance("UIGradient");
+    const strokeGradient = new UIGradient();
     strokeGradient.Color = BUTTON_STROKE_GRADIENT;
     strokeGradient.Rotation = 35;
     strokeGradient.Parent = stroke;
@@ -255,7 +255,7 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
 
     const baseColor = item.difficulty?.color ?? Color3.fromRGB(52, 155, 255);
 
-    const root = new Instance("Frame");
+    const root = new Frame();
     root.Name = `ShopSlot_${item.id}`;
     root.BackgroundTransparency = 1;
     root.Size = new UDim2(1, 0, 1, 0);
@@ -263,7 +263,7 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
     root.Visible = visible;
     root.Parent = parent;
 
-    const button = new Instance("TextButton");
+    const button = new TextButton();
     button.Name = "ItemButton";
     button.BackgroundColor3 = baseColor;
     button.BorderColor3 = Color3.fromRGB(0, 0, 0);
@@ -274,7 +274,7 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
     button.AutoButtonColor = true;
     button.Parent = root;
 
-    const padding = new Instance("UIPadding");
+    const padding = new UIPadding();
     padding.PaddingBottom = new UDim(0, 4);
     padding.PaddingTop = new UDim(0, 4);
     padding.PaddingLeft = new UDim(0, 4);
@@ -284,7 +284,7 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
     const stroke = createStroke(button, baseColor);
     applyStyling(button, 0.85);
 
-    const lockOverlay = new Instance("Frame");
+    const lockOverlay = new Frame();
     lockOverlay.Name = "LockOverlay";
     lockOverlay.Active = false;
     lockOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0);
@@ -296,10 +296,10 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
 
     getAsset("assets/Lock.png");
 
-    const lockCorner = new Instance("UICorner");
+    const lockCorner = new UICorner();
     lockCorner.Parent = lockOverlay;
 
-    const lockIcon = new Instance("ImageLabel");
+    const lockIcon = new ImageLabel();
     lockIcon.Name = "LockIcon";
     lockIcon.AnchorPoint = new Vector2(0.5, 0.5);
     lockIcon.BackgroundTransparency = 1;
@@ -311,7 +311,7 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
     lockIcon.ZIndex = 11;
     lockIcon.Parent = lockOverlay;
 
-    const lockText = new Instance("TextLabel");
+    const lockText = new TextLabel();
     lockText.Name = "LockText";
     lockText.AnchorPoint = new Vector2(0.5, 0.5);
     lockText.BackgroundTransparency = 1;
@@ -333,7 +333,7 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
     let itemImage: ImageLabel | undefined;
     let itemViewport: ViewportFrame | undefined;
     if (item.image !== undefined) {
-        itemImage = new Instance("ImageLabel");
+        itemImage = new ImageLabel();
         itemImage.Name = "ItemImage";
         itemImage.AnchorPoint = new Vector2(0.5, 0.5);
         itemImage.BackgroundTransparency = 1;
@@ -343,7 +343,7 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
         itemImage.SizeConstraint = Enum.SizeConstraint.RelativeYY;
         itemImage.Parent = button;
     } else {
-        itemViewport = new Instance("ViewportFrame");
+        itemViewport = new ViewportFrame();
         itemViewport.Name = "ItemViewport";
         itemViewport.AnchorPoint = new Vector2(0.5, 0.5);
         itemViewport.BackgroundTransparency = 1;
@@ -353,7 +353,7 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
         if (viewportsEnabled) ItemViewport.loadItemIntoViewport(itemViewport, item.id);
     }
 
-    const priceFrame = new Instance("Frame");
+    const priceFrame = new Frame();
     priceFrame.Name = "PriceFrame";
     priceFrame.AnchorPoint = new Vector2(0, 1);
     priceFrame.BackgroundColor3 = baseColor.Lerp(Color3.fromRGB(0, 0, 0), 0.7);
@@ -363,24 +363,24 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
     priceFrame.Size = new UDim2(1, 0, 0, 30);
     priceFrame.Parent = root;
 
-    const priceOptionFrame = new Instance("Frame");
+    const priceOptionFrame = new Frame();
     priceOptionFrame.Name = "PriceOption";
     priceOptionFrame.AutomaticSize = Enum.AutomaticSize.X;
     priceOptionFrame.BackgroundTransparency = 1;
     priceOptionFrame.Size = new UDim2(1, 0, 0, 28);
     priceOptionFrame.Parent = priceFrame;
 
-    const priceCorner = new Instance("UICorner");
+    const priceCorner = new UICorner();
     priceCorner.CornerRadius = new UDim(0, 4);
     priceCorner.Parent = priceOptionFrame;
 
-    const priceList = new Instance("UIListLayout");
+    const priceList = new UIListLayout();
     priceList.Padding = new UDim(0, 5);
     priceList.FillDirection = Enum.FillDirection.Horizontal;
     priceList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
     priceList.Parent = priceOptionFrame;
 
-    const priceImage = new Instance("ImageLabel");
+    const priceImage = new ImageLabel();
     priceImage.Name = "PriceImage";
     priceImage.BackgroundTransparency = 1;
     priceImage.Size = new UDim2(1, 0, 1, 0);
@@ -388,7 +388,7 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
     priceImage.Visible = false;
     priceImage.Parent = priceOptionFrame;
 
-    const priceViewport = new Instance("ViewportFrame");
+    const priceViewport = new ViewportFrame();
     priceViewport.Name = "PriceViewport";
     priceViewport.BackgroundTransparency = 1;
     priceViewport.Size = new UDim2(1, 0, 1, 0);
@@ -396,7 +396,7 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
     priceViewport.Visible = false;
     priceViewport.Parent = priceOptionFrame;
 
-    const priceText = new Instance("TextLabel");
+    const priceText = new TextLabel();
     priceText.Name = "PriceText";
     priceText.AutomaticSize = Enum.AutomaticSize.X;
     priceText.BackgroundTransparency = 1;
@@ -406,7 +406,7 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
     priceText.TextScaled = true;
     priceText.Parent = priceOptionFrame;
 
-    const priceStroke = new Instance("UIStroke");
+    const priceStroke = new UIStroke();
     priceStroke.Color = Color3.fromRGB(0, 0, 0);
     priceStroke.Thickness = 2;
     priceStroke.Parent = priceText;

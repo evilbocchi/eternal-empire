@@ -1515,14 +1515,14 @@ function DifficultyResearcherGui({
     }, []);
 
     useEffect(() => {
-        const orbLight = new Instance("PointLight");
+        const orbLight = new PointLight();
         orbLight.Brightness = 0;
         orbLight.Range = 0;
         orbLight.Color = Color3.fromRGB(255, 205, 255);
         orbLight.Parent = orbPart;
         orbLightRef.current = orbLight;
 
-        const vortexLight = new Instance("PointLight");
+        const vortexLight = new PointLight();
         vortexLight.Brightness = 0;
         vortexLight.Range = 0;
         vortexLight.Color = Color3.fromRGB(255, 180, 255);
@@ -1936,7 +1936,7 @@ export = new Item(script.Name)
         };
     })
     .onClientLoad((model, item, player) => {
-        const folder = new Instance("Folder");
+        const folder = new Folder();
         folder.Name = `ResearchBoard-${model.Name}`;
         folder.Parent = player?.FindFirstChild("PlayerGui") ?? StarterGui;
         const root = createRoot(folder);

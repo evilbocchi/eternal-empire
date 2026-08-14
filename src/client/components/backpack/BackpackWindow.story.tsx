@@ -28,7 +28,7 @@ export = CreateReactStory(
 
         useEffect(() => {
             let i = 0;
-            const container = new Instance("Folder");
+            const container = new Folder();
             container.Name = "Harvestable";
             container.Parent = Workspace;
 

@@ -36,7 +36,7 @@ export = CreateReactStory(
 
         const [adornee, setAdornee] = React.useState<Part | undefined>(undefined);
         useEffect(() => {
-            const part = new Instance("Part");
+            const part = new Part();
             part.Color = Color3.fromRGB(27, 42, 53);
             part.Size = new Vector3(20, 11, 0.5);
             part.Anchored = true;

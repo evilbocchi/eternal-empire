@@ -54,7 +54,7 @@ function EmpireOption({ empireId, empireInfo }: { empireId: string; empireInfo: 
                 playSound("MenuClick.mp3");
                 let screenGui: ScreenGui | undefined;
                 if (IS_EDIT) {
-                    screenGui = new Instance("ScreenGui");
+                    screenGui = new ScreenGui();
                     screenGui.IgnoreGuiInset = true;
                     screenGui.ResetOnSpawn = false;
                     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;

@@ -12,7 +12,7 @@ export = CreateReactStory(
         },
     },
     (props) => {
-        const [proximityPrompt] = useState(new Instance("ProximityPrompt"));
+        const [proximityPrompt] = useState(new ProximityPrompt());
 
         useEffect(() => {
             proximityPrompt.Enabled = props.controls.visible;

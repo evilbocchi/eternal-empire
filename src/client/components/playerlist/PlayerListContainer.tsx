@@ -175,7 +175,7 @@ export default function PlayerListContainer() {
             setRendered(true);
         }
 
-        const numberValue = new Instance("NumberValue");
+        const numberValue = new NumberValue();
         numberValue.Value = progressRef.current;
 
         const tween = TweenService.Create(

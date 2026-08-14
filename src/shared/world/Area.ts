@@ -38,7 +38,7 @@ export default class Area {
      * Created as an IntValue for game-wide tracking.
      */
     static readonly globalDropletLimit = (function () {
-        const globalDropletLimit = new Instance("IntValue");
+        const globalDropletLimit = new IntValue();
         globalDropletLimit.Name = "GlobalDropletLimit";
         globalDropletLimit.Value = 500;
         return globalDropletLimit;
@@ -49,7 +49,7 @@ export default class Area {
      * Created as a BoolValue for game-wide tracking.
      */
     static readonly globalUnlocked = (function () {
-        const globalUnlocked = new Instance("BoolValue");
+        const globalUnlocked = new BoolValue();
         globalUnlocked.Name = "GlobalUnlocked";
         globalUnlocked.Value = false;
         return globalUnlocked;

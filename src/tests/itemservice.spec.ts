@@ -107,7 +107,7 @@ describe("ItemService", () => {
         };
         items.worldPlaced.set(placementId, placedItem);
 
-        const model = new Instance("Model") as Model;
+        const model = new Model() as Model;
         model.Name = placementId;
         model.Parent = PLACED_ITEMS_FOLDER;
 
@@ -153,7 +153,7 @@ describe("ItemService", () => {
         };
         items.worldPlaced.set(placementId, placedItem);
 
-        const model = new Instance("Model") as Model;
+        const model = new Model() as Model;
         model.Name = placementId;
         model.Parent = PLACED_ITEMS_FOLDER;
 
@@ -207,7 +207,7 @@ describe("ItemService", () => {
             };
             items.worldPlaced.set(placementId, placedItem);
 
-            const model = new Instance("Model") as Model;
+            const model = new Model() as Model;
             model.Name = placementId;
             model.Parent = PLACED_ITEMS_FOLDER;
 

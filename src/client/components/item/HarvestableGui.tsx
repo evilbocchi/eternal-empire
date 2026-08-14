@@ -59,7 +59,7 @@ function HarvestableGui({ enabled, model }: { enabled: boolean; model: PVInstanc
             const currentTool = getPlayerCharacter()?.FindFirstChildOfClass("Tool");
             if (currentTool === undefined) return;
 
-            const highlight = new Instance("Highlight");
+            const highlight = new Highlight();
             TweenService.Create(highlight, new TweenInfo(0.5), {
                 FillTransparency: 1,
                 OutlineTransparency: 1,
@@ -85,7 +85,7 @@ function HarvestableGui({ enabled, model }: { enabled: boolean; model: PVInstanc
                 const colorBlend = math.clamp((multi - 1) / 3, 0, 1);
                 const damageColor = baseColor.Lerp(critColor, colorBlend);
 
-                const damageGui = new Instance("BillboardGui");
+                const damageGui = new BillboardGui();
                 const horizontalJitter = math.random(-25, 25) / 75;
                 const startingOffset = new Vector3(horizontalJitter, 0, horizontalJitter);
                 damageGui.Size = new UDim2(5, 0, 1, 0);
@@ -96,7 +96,7 @@ function HarvestableGui({ enabled, model }: { enabled: boolean; model: PVInstanc
                 damageGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
                 damageGui.Name = "HarvestableDamageLabel";
 
-                const valueLabel = new Instance("TextLabel");
+                const valueLabel = new TextLabel();
                 valueLabel.AnchorPoint = new Vector2(0.5, 0.5);
                 valueLabel.Position = new UDim2(0.5, 0, 0.5, 0);
                 valueLabel.BackgroundTransparency = 1;
@@ -109,7 +109,7 @@ function HarvestableGui({ enabled, model }: { enabled: boolean; model: PVInstanc
                 valueLabel.TextTransparency = 0;
                 valueLabel.Size = new UDim2(1, 0, 0.125 * (math.max(multi, 1) / 2) + 0.7, 0);
 
-                const stroke = new Instance("UIStroke");
+                const stroke = new UIStroke();
                 stroke.Thickness = 4;
                 stroke.Color = Color3.fromRGB(0, 0, 0);
                 stroke.Transparency = 0;

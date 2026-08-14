@@ -187,7 +187,7 @@ export default class Nanobot extends ItemTrait {
 
     private static createClientOrbs(model: Model, nanobot: Nanobot) {
         const modelCFrame = model.GetPivot();
-        const folder = new Instance("Folder");
+        const folder = new Folder();
         folder.Name = "NanobotOrbs";
         folder.Parent = model;
 
@@ -195,7 +195,7 @@ export default class Nanobot extends ItemTrait {
         const orbs = new Array<NanobotClientOrbState>();
         for (let i = 0; i < baseStates.size(); i++) {
             const state = baseStates[i];
-            const part = new Instance("Part");
+            const part = new Part();
             part.Name = `NanobotOrb${i + 1}`;
             part.Shape = Enum.PartType.Ball;
             part.Size = ORB_SIZE;

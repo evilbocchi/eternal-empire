@@ -113,7 +113,7 @@ namespace ItemViewport {
         const m = ITEM_MODELS.get(itemId);
         if (m === undefined) return;
 
-        const camera = new Instance("Camera");
+        const camera = new Camera();
         camera.CameraType = Enum.CameraType.Scriptable;
         viewportFrame.CurrentCamera = camera;
 

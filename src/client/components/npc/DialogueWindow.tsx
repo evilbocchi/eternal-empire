@@ -131,7 +131,7 @@ export default function DialogueWindow() {
             "NPCPrompt",
             (prompt) => {
                 if (!prompt.IsA("ProximityPrompt") || cleanupPerPrompt.has(prompt)) return;
-                const gui = new Instance("BillboardGui");
+                const gui = new BillboardGui();
                 gui.Active = true;
                 gui.ClipsDescendants = true;
                 gui.Size = new UDim2(2, 0, 2, 0);

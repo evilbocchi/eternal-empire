@@ -31,14 +31,14 @@ export default class Manumatic extends ItemTrait {
             last = now;
         });
 
-        const event = new Instance("BindableEvent");
+        const event = new BindableEvent();
         event.Name = "Click";
         event.Event.Connect((clickValue: number) => click(undefined, clickValue));
         event.Parent = model;
     }
 
     static clientLoad(model: Model, _manumatic: Manumatic) {
-        const clickDetector = new Instance("ClickDetector");
+        const clickDetector = new ClickDetector();
         clickDetector.MouseClick.Connect(() => {
             clientClickedPacket.toServer(model);
         });

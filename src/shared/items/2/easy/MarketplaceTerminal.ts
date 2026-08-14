@@ -25,7 +25,7 @@ export = new Item(script.Name)
         if (!primaryPart) return;
 
         // Create a subtle glow effect
-        const pointLight = new Instance("PointLight");
+        const pointLight = new PointLight();
         pointLight.Color = Color3.fromRGB(99, 255, 138);
         pointLight.Brightness = 0.5;
         pointLight.Range = 10;

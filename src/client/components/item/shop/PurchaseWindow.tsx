@@ -185,14 +185,14 @@ export default function PurchaseWindow() {
             const mousePosition = Environment.UserInput.GetMouseLocation();
             let frame: GuiObject;
             if (item.image) {
-                const imageLabel = new Instance("ImageLabel");
+                const imageLabel = new ImageLabel();
                 imageLabel.AnchorPoint = new Vector2(0.5, 0.5);
                 imageLabel.BackgroundTransparency = 1;
                 imageLabel.Image = item.image;
                 imageLabel.Size = new UDim2(0, 60, 0, 60);
                 frame = imageLabel;
             } else {
-                const viewportFrame = new Instance("ViewportFrame");
+                const viewportFrame = new ViewportFrame();
                 viewportFrame.AnchorPoint = new Vector2(0.5, 0.5);
                 viewportFrame.BackgroundTransparency = 1;
                 viewportFrame.Size = new UDim2(0, 60, 0, 60);

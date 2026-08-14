@@ -223,7 +223,7 @@ export class Challenge {
                 meteor.CanTouch = false;
                 meteor.CanQuery = false;
                 const reverb = () => {
-                    const part = new Instance("Part");
+                    const part = new Part();
                     part.Anchored = true;
                     part.CanCollide = false;
                     part.Shape = Enum.PartType.Ball;
@@ -242,7 +242,7 @@ export class Challenge {
                 reverb();
                 task.delay(0.1, reverb);
                 task.delay(0.2, reverb);
-                const explosion = new Instance("Explosion");
+                const explosion = new Explosion();
                 explosion.ExplosionType = Enum.ExplosionType.NoCraters;
                 explosion.BlastRadius = 150;
                 explosion.BlastPressure = 500000;

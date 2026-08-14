@@ -54,7 +54,7 @@ export = new Command(script.Name)
             Server.ChatHook.sendPrivateMessage(sender, `Banned player ${target.Name}`, "color:138,255,138");
             const h = target.Character?.FindFirstChildOfClass("Humanoid");
             if (h !== undefined && h.RootPart !== undefined) {
-                const smoke = new Instance("Smoke");
+                const smoke = new Smoke();
                 smoke.Size = 5;
                 smoke.TimeScale = 20;
                 smoke.Parent = h.RootPart;
@@ -62,7 +62,7 @@ export = new Command(script.Name)
                     (h.RootPart.FindFirstChild("LVAttachment") as Attachment) ?? new Instance("Attachment", h.RootPart);
                 attachment.Name = "LVAttachment";
                 const vector = new Vector3(0, 300, 0);
-                const linearVelocity = new Instance("LinearVelocity");
+                const linearVelocity = new LinearVelocity();
                 linearVelocity.MaxForce = vector.Magnitude * 20000;
                 linearVelocity.VectorVelocity = vector;
                 linearVelocity.Attachment0 = attachment;

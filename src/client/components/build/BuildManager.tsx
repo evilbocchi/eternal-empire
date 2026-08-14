@@ -43,7 +43,7 @@ namespace BuildManager {
     export let mainSelected: Model | undefined;
     let lastPreviewDifficultyId: string | undefined;
 
-    export const rotationValue = new Instance("IntValue");
+    export const rotationValue = new IntValue();
 
     /**
      * CFrame of the main model in {@link selected} before it was selected.
@@ -331,7 +331,7 @@ namespace BuildManager {
         weldModel(itemModel); // we are using tweens on primarypart
 
         const primaryPart = itemModel.PrimaryPart!;
-        const indicator = new Instance("Part");
+        const indicator = new Part();
         indicator.Transparency = 1;
         indicator.CanCollide = false;
         indicator.Anchored = true;
@@ -339,7 +339,7 @@ namespace BuildManager {
         indicator.Size = primaryPart.Size;
         indicator.Name = "Indicator";
 
-        const selectionBox = new Instance("SelectionBox");
+        const selectionBox = new SelectionBox();
         selectionBox.Adornee = indicator;
         selectionBox.Transparency = 0.35;
         selectionBox.SurfaceTransparency = 0.75;

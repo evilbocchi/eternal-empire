@@ -17,7 +17,7 @@ export = CreateReactStory(
         const [screenGui, setScreenGui] = useState<ScreenGui>();
 
         useEffect(() => {
-            const screenGui = new Instance("ScreenGui");
+            const screenGui = new ScreenGui();
             screenGui.IgnoreGuiInset = true;
             screenGui.ResetOnSpawn = false;
             screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;

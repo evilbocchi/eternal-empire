@@ -143,7 +143,7 @@ export default class Generator extends Boostable {
 
         if (clickPart !== undefined) {
             clickPart.CanQuery = true;
-            const clickDetector = new Instance("ClickDetector");
+            const clickDetector = new ClickDetector();
             clickDetector.MouseClick.Connect(() => generatedPacket.toServer(model, new Map()));
             clickDetector.Parent = clickPart;
         }

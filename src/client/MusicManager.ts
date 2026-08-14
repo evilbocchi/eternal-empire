@@ -34,7 +34,7 @@ namespace MusicManager {
 
     export let playing: Sound | undefined = undefined;
 
-    export const MUSIC_GROUP = new Instance("SoundGroup");
+    export const MUSIC_GROUP = new SoundGroup();
     MUSIC_GROUP.Name = "Music";
     MUSIC_GROUP.Parent = IS_EDIT ? Environment.PluginWidget : SoundService;
 
@@ -46,7 +46,7 @@ namespace MusicManager {
         if (!areaBounds) continue;
 
         // Create dedicated sound group for this area's audio
-        const areaSoundGroup = new Instance("SoundGroup");
+        const areaSoundGroup = new SoundGroup();
         areaSoundGroup.Name = id;
         areaSoundGroup.Volume = 1;
         areaSoundGroup.Parent = MUSIC_GROUP;

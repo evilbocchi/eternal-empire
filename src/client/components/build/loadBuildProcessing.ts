@@ -144,8 +144,8 @@ export default function loadBuildProcessing() {
                     const diameter = (charger.radius ?? 0) * 2 + hitbox.Size.X;
                     const l0 = (11 / 18) * diameter;
                     const l1 = (-12 / 18) * diameter;
-                    const attachment0 = new Instance("Attachment");
-                    const attachment1 = new Instance("Attachment");
+                    const attachment0 = new Attachment();
+                    const attachment1 = new Attachment();
                     const yOffset = -(hitbox.Size.Y / 2);
                     attachment0.Position = new Vector3(0, yOffset, diameter / 2 - 0.25);
                     attachment1.Position = new Vector3(0, yOffset, -(diameter / 2 - 0.25));

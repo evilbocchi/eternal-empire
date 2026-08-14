@@ -42,7 +42,7 @@ export default class Conveyor extends ItemTrait {
         const beamPerPart = new Map<BasePart, { beam: Beam; updateSpeed: (speed: number) => void }>();
         for (const [part, stats] of statsPerPart) {
             const width = part.Size.X;
-            const beam = new Instance("Beam");
+            const beam = new Beam();
             beam.Name = "ConveyorArrow";
             beam.Texture = getAsset("assets/ConveyorArrow.png");
             beam.Segments = 10;

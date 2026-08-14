@@ -237,9 +237,9 @@ class StoryMocking {
      * @see {@link https://www.github.com/Validark/rbxts-Object-To-Tree} Auto-generated from a template rig.
      */
     private static generateDummyRig() {
-        const Rig = new Instance("Model");
+        const Rig = new Model();
 
-        const Head = new Instance("Part");
+        const Head = new Part();
         Head.Color = Color3.fromRGB(215, 197, 154);
         Head.Name = "Head";
         Head.PivotOffset = CFrame.fromOrientation(math.rad(0), math.rad(0), math.rad(0)).add(new Vector3(0, -4.5, 0));
@@ -248,21 +248,21 @@ class StoryMocking {
         Rig.PrimaryPart = Head;
         Head.Parent = Rig;
 
-        const LeftArm = new Instance("Part");
+        const LeftArm = new Part();
         LeftArm.CanCollide = false;
         LeftArm.Color = Color3.fromRGB(161, 196, 140);
         LeftArm.Name = "Left Arm";
         LeftArm.Size = new Vector3(1, 2, 1);
         LeftArm.Parent = Rig;
 
-        const RightArm = new Instance("Part");
+        const RightArm = new Part();
         RightArm.CanCollide = false;
         RightArm.Color = Color3.fromRGB(161, 196, 140);
         RightArm.Name = "Right Arm";
         RightArm.Size = new Vector3(1, 2, 1);
         RightArm.Parent = Rig;
 
-        const LeftLeg = new Instance("Part");
+        const LeftLeg = new Part();
         LeftLeg.BottomSurface = Enum.SurfaceType.Smooth;
         LeftLeg.CanCollide = false;
         LeftLeg.Color = Color3.fromRGB(110, 153, 202);
@@ -270,7 +270,7 @@ class StoryMocking {
         LeftLeg.Size = new Vector3(1, 2, 1);
         LeftLeg.Parent = Rig;
 
-        const RightLeg = new Instance("Part");
+        const RightLeg = new Part();
         RightLeg.BottomSurface = Enum.SurfaceType.Smooth;
         RightLeg.CanCollide = false;
         RightLeg.Color = Color3.fromRGB(110, 153, 202);
@@ -278,35 +278,35 @@ class StoryMocking {
         RightLeg.Size = new Vector3(1, 2, 1);
         RightLeg.Parent = Rig;
 
-        const Mesh = new Instance("SpecialMesh");
+        const Mesh = new SpecialMesh();
         Mesh.Scale = new Vector3(1.25, 1.25, 1.25);
         Mesh.Parent = Head;
 
-        const HairAttachment = new Instance("Attachment");
+        const HairAttachment = new Attachment();
         HairAttachment.Name = "HairAttachment";
         HairAttachment.Position = new Vector3(0, 0.6, 0);
         HairAttachment.Parent = Head;
 
-        const HatAttachment = new Instance("Attachment");
+        const HatAttachment = new Attachment();
         HatAttachment.Name = "HatAttachment";
         HatAttachment.Position = new Vector3(0, 0.6, 0);
         HatAttachment.Parent = Head;
 
-        const FaceFrontAttachment = new Instance("Attachment");
+        const FaceFrontAttachment = new Attachment();
         FaceFrontAttachment.Name = "FaceFrontAttachment";
         FaceFrontAttachment.Position = new Vector3(0, 0, -0.6);
         FaceFrontAttachment.Parent = Head;
 
-        const FaceCenterAttachment = new Instance("Attachment");
+        const FaceCenterAttachment = new Attachment();
         FaceCenterAttachment.Name = "FaceCenterAttachment";
         FaceCenterAttachment.Parent = Head;
 
-        const face = new Instance("Decal");
+        const face = new Decal();
         face.Name = "face";
         face.Texture = "http://www.roblox.com/asset/?id=144080495";
         face.Parent = Head;
 
-        const Torso = new Instance("Part");
+        const Torso = new Part();
         Torso.Color = Color3.fromRGB(0, 0, 255);
         Torso.LeftSurface = Enum.SurfaceType.Weld;
         Torso.Name = "Torso";
@@ -314,51 +314,51 @@ class StoryMocking {
         Torso.Size = new Vector3(2, 2, 1);
         Torso.Parent = Rig;
 
-        const roblox = new Instance("Decal");
+        const roblox = new Decal();
         roblox.Name = "roblox";
         roblox.Parent = Torso;
 
-        const NeckAttachment = new Instance("Attachment");
+        const NeckAttachment = new Attachment();
         NeckAttachment.Name = "NeckAttachment";
         NeckAttachment.Position = new Vector3(0, 1, 0);
         NeckAttachment.Parent = Torso;
 
-        const BodyFrontAttachment = new Instance("Attachment");
+        const BodyFrontAttachment = new Attachment();
         BodyFrontAttachment.Name = "BodyFrontAttachment";
         BodyFrontAttachment.Position = new Vector3(0, 0, -0.5);
         BodyFrontAttachment.Parent = Torso;
 
-        const BodyBackAttachment = new Instance("Attachment");
+        const BodyBackAttachment = new Attachment();
         BodyBackAttachment.Name = "BodyBackAttachment";
         BodyBackAttachment.Position = new Vector3(0, 0, 0.5);
         BodyBackAttachment.Parent = Torso;
 
-        const LeftCollarAttachment = new Instance("Attachment");
+        const LeftCollarAttachment = new Attachment();
         LeftCollarAttachment.Name = "LeftCollarAttachment";
         LeftCollarAttachment.Position = new Vector3(-1, 1, 0);
         LeftCollarAttachment.Parent = Torso;
 
-        const RightCollarAttachment = new Instance("Attachment");
+        const RightCollarAttachment = new Attachment();
         RightCollarAttachment.Name = "RightCollarAttachment";
         RightCollarAttachment.Position = new Vector3(1, 1, 0);
         RightCollarAttachment.Parent = Torso;
 
-        const WaistFrontAttachment = new Instance("Attachment");
+        const WaistFrontAttachment = new Attachment();
         WaistFrontAttachment.Name = "WaistFrontAttachment";
         WaistFrontAttachment.Position = new Vector3(0, -1, -0.5);
         WaistFrontAttachment.Parent = Torso;
 
-        const WaistCenterAttachment = new Instance("Attachment");
+        const WaistCenterAttachment = new Attachment();
         WaistCenterAttachment.Name = "WaistCenterAttachment";
         WaistCenterAttachment.Position = new Vector3(0, -1, 0);
         WaistCenterAttachment.Parent = Torso;
 
-        const WaistBackAttachment = new Instance("Attachment");
+        const WaistBackAttachment = new Attachment();
         WaistBackAttachment.Name = "WaistBackAttachment";
         WaistBackAttachment.Position = new Vector3(0, -1, 0.5);
         WaistBackAttachment.Parent = Torso;
 
-        const RightShoulder = new Instance("Motor6D");
+        const RightShoulder = new Motor6D();
         RightShoulder.C0 = CFrame.fromOrientation(math.rad(0), math.rad(90), math.rad(0)).add(new Vector3(1, 0.5, 0));
         RightShoulder.C1 = CFrame.fromOrientation(math.rad(0), math.rad(90), math.rad(0)).add(
             new Vector3(-0.5, 0.5, 0),
@@ -369,7 +369,7 @@ class StoryMocking {
         RightShoulder.Part1 = RightArm;
         RightShoulder.Parent = Torso;
 
-        const LeftShoulder = new Instance("Motor6D");
+        const LeftShoulder = new Motor6D();
         LeftShoulder.C0 = CFrame.fromOrientation(math.rad(0), math.rad(-90), math.rad(0)).add(new Vector3(-1, 0.5, 0));
         LeftShoulder.C1 = CFrame.fromOrientation(math.rad(0), math.rad(-90), math.rad(0)).add(new Vector3(0.5, 0.5, 0));
         LeftShoulder.MaxVelocity = 0.1;
@@ -378,7 +378,7 @@ class StoryMocking {
         LeftShoulder.Part1 = LeftArm;
         LeftShoulder.Parent = Torso;
 
-        const RightHip = new Instance("Motor6D");
+        const RightHip = new Motor6D();
         RightHip.C0 = CFrame.fromOrientation(math.rad(0), math.rad(90), math.rad(0)).add(new Vector3(1, -1, 0));
         RightHip.C1 = CFrame.fromOrientation(math.rad(0), math.rad(90), math.rad(0)).add(new Vector3(0.5, 1, 0));
         RightHip.MaxVelocity = 0.1;
@@ -387,7 +387,7 @@ class StoryMocking {
         RightHip.Part1 = RightLeg;
         RightHip.Parent = Torso;
 
-        const LeftHip = new Instance("Motor6D");
+        const LeftHip = new Motor6D();
         LeftHip.C0 = CFrame.fromOrientation(math.rad(0), math.rad(-90), math.rad(0)).add(new Vector3(-1, -1, 0));
         LeftHip.C1 = CFrame.fromOrientation(math.rad(0), math.rad(-90), math.rad(0)).add(new Vector3(-0.5, 1, 0));
         LeftHip.MaxVelocity = 0.1;
@@ -396,7 +396,7 @@ class StoryMocking {
         LeftHip.Part1 = LeftLeg;
         LeftHip.Parent = Torso;
 
-        const Neck = new Instance("Motor6D");
+        const Neck = new Motor6D();
         Neck.C0 = CFrame.fromOrientation(math.rad(-90), math.rad(180), math.rad(0)).add(new Vector3(0, 1, 0));
         Neck.C1 = CFrame.fromOrientation(math.rad(-90), math.rad(180), math.rad(0)).add(new Vector3(0, -0.5, 0));
         Neck.MaxVelocity = 0.1;
@@ -405,43 +405,43 @@ class StoryMocking {
         Neck.Part1 = Head;
         Neck.Parent = Torso;
 
-        const LeftShoulderAttachment = new Instance("Attachment");
+        const LeftShoulderAttachment = new Attachment();
         LeftShoulderAttachment.Name = "LeftShoulderAttachment";
         LeftShoulderAttachment.Position = new Vector3(0, 1, 0);
         LeftShoulderAttachment.Parent = LeftArm;
 
-        const LeftGripAttachment = new Instance("Attachment");
+        const LeftGripAttachment = new Attachment();
         LeftGripAttachment.Name = "LeftGripAttachment";
         LeftGripAttachment.Position = new Vector3(0, -1, 0);
         LeftGripAttachment.Parent = LeftArm;
 
-        const RightShoulderAttachment = new Instance("Attachment");
+        const RightShoulderAttachment = new Attachment();
         RightShoulderAttachment.Name = "RightShoulderAttachment";
         RightShoulderAttachment.Position = new Vector3(0, 1, 0);
         RightShoulderAttachment.Parent = RightArm;
 
-        const RightGripAttachment = new Instance("Attachment");
+        const RightGripAttachment = new Attachment();
         RightGripAttachment.Name = "RightGripAttachment";
         RightGripAttachment.Position = new Vector3(0, -1, 0);
         RightGripAttachment.Parent = RightArm;
 
-        const LeftFootAttachment = new Instance("Attachment");
+        const LeftFootAttachment = new Attachment();
         LeftFootAttachment.Name = "LeftFootAttachment";
         LeftFootAttachment.Position = new Vector3(0, -1, 0);
         LeftFootAttachment.Parent = LeftLeg;
 
-        const RightFootAttachment = new Instance("Attachment");
+        const RightFootAttachment = new Attachment();
         RightFootAttachment.Name = "RightFootAttachment";
         RightFootAttachment.Position = new Vector3(0, -1, 0);
         RightFootAttachment.Parent = RightLeg;
 
-        const Humanoid = new Instance("Humanoid");
+        const Humanoid = new Humanoid();
         Humanoid.Parent = Rig;
 
-        const Animator = new Instance("Animator");
+        const Animator = new Animator();
         Animator.Parent = Humanoid;
 
-        const HumanoidDescription = new Instance("HumanoidDescription");
+        const HumanoidDescription = new HumanoidDescription();
         HumanoidDescription.BodyTypeScale = 0;
         HumanoidDescription.Face = 144075659;
         HumanoidDescription.HeadColor = Color3.fromRGB(215, 197, 154);
@@ -456,36 +456,36 @@ class StoryMocking {
         HumanoidDescription.TorsoColor = Color3.fromRGB(0, 0, 255);
         HumanoidDescription.Parent = Humanoid;
 
-        const BodyPartDescription = new Instance("BodyPartDescription");
+        const BodyPartDescription = new BodyPartDescription();
         BodyPartDescription.Color = Color3.fromRGB(215, 197, 154);
         BodyPartDescription.Parent = HumanoidDescription;
 
-        const LeftArmPartDescription = new Instance("BodyPartDescription");
+        const LeftArmPartDescription = new BodyPartDescription();
         LeftArmPartDescription.BodyPart = Enum.BodyPart.LeftArm;
         LeftArmPartDescription.Color = Color3.fromRGB(161, 196, 140);
         LeftArmPartDescription.Parent = HumanoidDescription;
 
-        const RightArmPartDescription = new Instance("BodyPartDescription");
+        const RightArmPartDescription = new BodyPartDescription();
         RightArmPartDescription.BodyPart = Enum.BodyPart.RightArm;
         RightArmPartDescription.Color = Color3.fromRGB(161, 196, 140);
         RightArmPartDescription.Parent = HumanoidDescription;
 
-        const TorsoPartDescription = new Instance("BodyPartDescription");
+        const TorsoPartDescription = new BodyPartDescription();
         TorsoPartDescription.BodyPart = Enum.BodyPart.Torso;
         TorsoPartDescription.Color = Color3.fromRGB(0, 0, 255);
         TorsoPartDescription.Parent = HumanoidDescription;
 
-        const LeftLegPartDescription = new Instance("BodyPartDescription");
+        const LeftLegPartDescription = new BodyPartDescription();
         LeftLegPartDescription.BodyPart = Enum.BodyPart.LeftLeg;
         LeftLegPartDescription.Color = Color3.fromRGB(110, 153, 202);
         LeftLegPartDescription.Parent = HumanoidDescription;
 
-        const RightLegPartDescription = new Instance("BodyPartDescription");
+        const RightLegPartDescription = new BodyPartDescription();
         RightLegPartDescription.BodyPart = Enum.BodyPart.RightLeg;
         RightLegPartDescription.Color = Color3.fromRGB(110, 153, 202);
         RightLegPartDescription.Parent = HumanoidDescription;
 
-        const HumanoidRootPart = new Instance("Part");
+        const HumanoidRootPart = new Part();
         HumanoidRootPart.BottomSurface = Enum.SurfaceType.Smooth;
         HumanoidRootPart.CanCollide = false;
         HumanoidRootPart.Name = "HumanoidRootPart";
@@ -494,11 +494,11 @@ class StoryMocking {
         HumanoidRootPart.Transparency = 1;
         HumanoidRootPart.Parent = Rig;
 
-        const RootAttachment = new Instance("Attachment");
+        const RootAttachment = new Attachment();
         RootAttachment.Name = "RootAttachment";
         RootAttachment.Parent = HumanoidRootPart;
 
-        const RootJoint = new Instance("Motor6D");
+        const RootJoint = new Motor6D();
         RootJoint.C0 = CFrame.fromOrientation(math.rad(-90), math.rad(180), math.rad(0)).add(new Vector3(0, 0, 0));
         RootJoint.C1 = CFrame.fromOrientation(math.rad(-90), math.rad(180), math.rad(0)).add(new Vector3(0, 0, 0));
         RootJoint.MaxVelocity = 0.1;
@@ -507,12 +507,12 @@ class StoryMocking {
         RootJoint.Part1 = Torso;
         RootJoint.Parent = HumanoidRootPart;
 
-        const Shirt = new Instance("Shirt");
+        const Shirt = new Shirt();
         Shirt.Name = "Shirt";
         Shirt.ShirtTemplate = "http://www.roblox.com/asset/?id=6273011603";
         Shirt.Parent = Rig;
 
-        const BodyColors = new Instance("BodyColors");
+        const BodyColors = new BodyColors();
         BodyColors.HeadColor = new BrickColor("Brick yellow");
         BodyColors.HeadColor3 = Color3.fromRGB(215, 197, 154);
         BodyColors.LeftArmColor = new BrickColor("Medium green");

@@ -24,7 +24,7 @@ export default function DialogueHeadshot({ model }: DialogueHeadshotProps) {
         const viewport = viewportRef.current;
         viewport.ClearAllChildren();
 
-        const camera = new Instance("Camera");
+        const camera = new Camera();
         camera.Parent = viewport;
         viewport.CurrentCamera = camera;
 

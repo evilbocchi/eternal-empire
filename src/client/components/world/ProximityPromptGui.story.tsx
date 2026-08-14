@@ -17,13 +17,13 @@ export = CreateReactStory(
         const [prompt, setPrompt] = useState<ProximityPrompt>();
 
         useEffect(() => {
-            const part = new Instance("Part");
+            const part = new Part();
             part.Anchored = true;
             part.Position = new Vector3(0, 5, 0);
             part.Size = new Vector3(4, 1, 4);
             part.Parent = Workspace;
 
-            const proximityPrompt = new Instance("ProximityPrompt");
+            const proximityPrompt = new ProximityPrompt();
             proximityPrompt.ActionText = "Test Action";
             proximityPrompt.ClickablePrompt = true;
             proximityPrompt.ObjectText = "Test Object";

@@ -11,7 +11,7 @@ describe("ItemPlacement", () => {
 
     beforeEach(() => {
         // Create a test part in workspace that will act as an existing item
-        testPart = new Instance("Part");
+        testPart = new Part();
         testPart.Name = "Hitbox";
         testPart.Size = new Vector3(3, 3, 3);
         testPart.Position = new Vector3(0, 0, 0);
@@ -19,9 +19,9 @@ describe("ItemPlacement", () => {
         testPart.Parent = Workspace;
 
         // Create a test item model
-        itemModel = new Instance("Model");
+        itemModel = new Model();
         itemModel.Name = "TestItem";
-        const hitbox = new Instance("Part");
+        const hitbox = new Part();
         hitbox.Name = "Hitbox";
         hitbox.Size = new Vector3(3, 3, 3);
         hitbox.CollisionGroup = "ItemHitbox";
@@ -66,7 +66,7 @@ describe("ItemPlacement", () => {
 
         it("handles different item sizes", () => {
             // Create larger item
-            const largeHitbox = new Instance("Part");
+            const largeHitbox = new Part();
             largeHitbox.Name = "Hitbox";
             largeHitbox.Size = new Vector3(6, 6, 6);
             largeHitbox.CollisionGroup = "ItemHitbox";
@@ -132,7 +132,7 @@ describe("ItemPlacement", () => {
 
         it("handles rotated items correctly", () => {
             // Create rectangular item
-            const rectHitbox = new Instance("Part");
+            const rectHitbox = new Part();
             rectHitbox.Name = "Hitbox";
             rectHitbox.Size = new Vector3(6, 3, 3);
             rectHitbox.CollisionGroup = "ItemHitbox";
@@ -154,7 +154,7 @@ describe("ItemPlacement", () => {
 
         beforeEach(() => {
             // Create build area
-            gridPart = new Instance("Part");
+            gridPart = new Part();
             gridPart.Name = "TestGrid";
             gridPart.Size = new Vector3(30, 1, 30);
             gridPart.Position = new Vector3(0, 0, 0);
@@ -220,7 +220,7 @@ describe("ItemPlacement", () => {
         let boundsPart: BasePart;
 
         beforeEach(() => {
-            boundsPart = new Instance("Part");
+            boundsPart = new Part();
             boundsPart.Name = "CustomBounds";
             boundsPart.Size = new Vector3(20, 20, 20);
             boundsPart.Position = new Vector3(0, 0, 0);
@@ -253,7 +253,7 @@ describe("ItemPlacement", () => {
             const item = new Item("test");
             item.bounds = "CustomBounds";
 
-            const modelWithoutPrimary = new Instance("Model");
+            const modelWithoutPrimary = new Model();
             modelWithoutPrimary.Parent = Workspace;
 
             const isValid = ItemPlacement.isInPlaceableArea(modelWithoutPrimary, item);
@@ -265,7 +265,7 @@ describe("ItemPlacement", () => {
 
     describe("Edge Cases", () => {
         it("handles model without hitbox", () => {
-            const emptyModel = new Instance("Model");
+            const emptyModel = new Model();
             emptyModel.Name = "EmptyModel";
             emptyModel.Parent = Workspace;
 
@@ -276,7 +276,7 @@ describe("ItemPlacement", () => {
         });
 
         it("handles model with non-BasePart hitbox child", () => {
-            const folder = new Instance("Folder");
+            const folder = new Folder();
             folder.Name = "Hitbox";
             folder.Parent = itemModel;
 

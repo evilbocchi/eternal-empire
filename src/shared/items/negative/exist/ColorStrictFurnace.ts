@@ -168,7 +168,7 @@ export = new Item(script.Name)
                 if (id === undefined) continue;
                 let clickDetector = colorSwitch.FindFirstChildOfClass("ClickDetector");
                 if (clickDetector === undefined) {
-                    clickDetector = new Instance("ClickDetector");
+                    clickDetector = new ClickDetector();
                     clickDetector.Parent = colorSwitch;
                 }
                 colorSwitches.set(id, colorSwitch);

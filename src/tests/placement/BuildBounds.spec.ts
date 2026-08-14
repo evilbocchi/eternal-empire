@@ -6,7 +6,7 @@ describe("BuildBounds", () => {
     let gridPart: BasePart;
 
     beforeEach(() => {
-        gridPart = new Instance("Part");
+        gridPart = new Part();
         gridPart.Name = "TestGrid";
         gridPart.Size = new Vector3(30, 1, 30);
         gridPart.Position = new Vector3(300, 0, 300);
@@ -178,7 +178,7 @@ describe("BuildBounds", () => {
         });
 
         it("validates part completely inside bounds", () => {
-            const part = new Instance("Part");
+            const part = new Part();
             part.Size = new Vector3(3, 3, 3);
             part.Position = new Vector3(300, 0, 300); // Grid center
             expect(bounds.isCompletelyInside(part)).toBe(true);
@@ -186,7 +186,7 @@ describe("BuildBounds", () => {
         });
 
         it("validates part partially outside bounds", () => {
-            const part = new Instance("Part");
+            const part = new Part();
             part.Size = new Vector3(3, 3, 3);
             part.Position = new Vector3(314, 0, 314); // Partially outside
             expect(bounds.isCompletelyInside(part)).toBe(false);
@@ -194,7 +194,7 @@ describe("BuildBounds", () => {
         });
 
         it("validates part completely outside bounds", () => {
-            const part = new Instance("Part");
+            const part = new Part();
             part.Size = new Vector3(3, 3, 3);
             part.Position = new Vector3(100, 0, 100);
             expect(bounds.isCompletelyInside(part)).toBe(false);
@@ -202,7 +202,7 @@ describe("BuildBounds", () => {
         });
 
         it("validates large part in small bounds", () => {
-            const part = new Instance("Part");
+            const part = new Part();
             part.Size = new Vector3(50, 50, 50); // Larger than bounds
             part.Position = new Vector3(300, 0, 300); // Grid center
             expect(bounds.isCompletelyInside(part)).toBe(false);
@@ -212,7 +212,7 @@ describe("BuildBounds", () => {
 
     describe("Edge Cases", () => {
         it("handles zero-sized grid", () => {
-            const emptyGrid = new Instance("Part");
+            const emptyGrid = new Part();
             emptyGrid.Size = new Vector3(0, 0, 0);
             emptyGrid.Parent = Workspace;
 
@@ -222,7 +222,7 @@ describe("BuildBounds", () => {
         });
 
         it("handles very large grid", () => {
-            const largeGrid = new Instance("Part");
+            const largeGrid = new Part();
             largeGrid.Size = new Vector3(1000, 1, 1000);
             largeGrid.Parent = Workspace;
 

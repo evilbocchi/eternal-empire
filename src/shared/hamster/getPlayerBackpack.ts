@@ -4,7 +4,7 @@ import eat from "shared/hamster/eat";
 
 let mockBackpack: Backpack | undefined;
 if (IS_EDIT && Players.LocalPlayer === undefined) {
-    mockBackpack = new Instance("Backpack");
+    mockBackpack = new Backpack();
     mockBackpack.Name = "Backpack";
     mockBackpack.Parent = Workspace;
     eat(mockBackpack, "Destroy");

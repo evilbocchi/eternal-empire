@@ -169,7 +169,7 @@ export default class NPC extends Identifiable {
         });
 
         // Set up proximity prompt for NPC interaction
-        const prompt = new Instance("ProximityPrompt");
+        const prompt = new ProximityPrompt();
         prompt.Style = Enum.ProximityPromptStyle.Custom;
         prompt.ActionText = "Interact";
         prompt.Enabled = true;

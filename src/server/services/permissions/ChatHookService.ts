@@ -26,7 +26,7 @@ import Packets from "shared/Packets";
 export default class ChatHookService implements OnStart, OnPlayerAdded {
     readonly GLOBAL_CHANNEL = (() => {
         if (IS_EDIT) return undefined;
-        const globalChatChannel = new Instance("TextChannel");
+        const globalChatChannel = new TextChannel();
         globalChatChannel.Name = "Global";
         globalChatChannel.Parent = getTextChannels();
         return globalChatChannel;

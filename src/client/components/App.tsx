@@ -62,7 +62,7 @@ function setParent(instance: Instance) {
 }
 
 function createScreenGui(name: string, displayOrder = 0, ignoreGuiInset = true): ScreenGui {
-    const screenGui = new Instance("ScreenGui");
+    const screenGui = new ScreenGui();
     screenGui.IgnoreGuiInset = ignoreGuiInset;
     screenGui.ResetOnSpawn = false;
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
@@ -73,7 +73,7 @@ function createScreenGui(name: string, displayOrder = 0, ignoreGuiInset = true):
 }
 
 function createFolder(name: string): Folder {
-    const folder = new Instance("Folder");
+    const folder = new Folder();
     folder.Name = name;
     setParent(folder);
     return folder;

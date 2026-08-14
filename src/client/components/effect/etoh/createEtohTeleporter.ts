@@ -47,7 +47,7 @@ export default function createEtohTeleporter(model: Model) {
                 destinations.push(tp);
             } else if (tp.Name === "Teleporter" && tp.IsA("BasePart")) {
                 if (tp.FindFirstChild("ButtonActivated")) {
-                    const a = new Instance("BoolValue");
+                    const a = new BoolValue();
                     a.Name = "Activated";
                     a.Parent = tp;
                     if (tp.FindFirstChild("Invert")) {

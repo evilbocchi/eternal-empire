@@ -26,14 +26,14 @@ function createCurrencyGain(
     const details = CURRENCY_DETAILS[currency];
 
     // Create the main frame
-    const frame = new Instance("Frame");
+    const frame = new Frame();
     frame.AnchorPoint = new Vector2(0.5, 0.5);
     frame.AutomaticSize = Enum.AutomaticSize.XY;
     frame.BackgroundTransparency = 1;
     frame.Parent = parent;
 
     // Create the currency image
-    const imageLabel = new Instance("ImageLabel");
+    const imageLabel = new ImageLabel();
     imageLabel.AnchorPoint = new Vector2(0, 0.5);
     imageLabel.BackgroundTransparency = 1;
     imageLabel.Image = details.image;
@@ -43,7 +43,7 @@ function createCurrencyGain(
     imageLabel.Parent = frame;
 
     // Create the currency amount text
-    const textLabel = new Instance("TextLabel");
+    const textLabel = new TextLabel();
     textLabel.AutomaticSize = Enum.AutomaticSize.X;
     textLabel.BackgroundTransparency = 1;
     textLabel.Font = Enum.Font.Unknown;
@@ -57,12 +57,12 @@ function createCurrencyGain(
     textLabel.Parent = frame;
 
     // Create the text stroke
-    const stroke = new Instance("UIStroke");
+    const stroke = new UIStroke();
     stroke.Thickness = 2;
     stroke.Parent = textLabel;
 
     // Create the layout
-    const layout = new Instance("UIListLayout");
+    const layout = new UIListLayout();
     layout.FillDirection = Enum.FillDirection.Horizontal;
     layout.Padding = new UDim(0, 3);
     layout.SortOrder = Enum.SortOrder.LayoutOrder;
@@ -154,7 +154,7 @@ function CurrencyGainManager() {
 
             burnSound.PlaybackSpeed = (math.random() * 0.3 + 0.85) / sizeMagnitude;
             if (sizeMagnitude > 0.666) {
-                const reverb = new Instance("ReverbSoundEffect");
+                const reverb = new ReverbSoundEffect();
                 reverb.DecayTime = sizeMagnitude / 2;
                 reverb.DryLevel = 0.5;
                 reverb.WetLevel = 0.5;

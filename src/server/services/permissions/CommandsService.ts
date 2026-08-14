@@ -67,7 +67,7 @@ export default class CommandsService implements OnInit {
     private registerCommand(command: Command) {
         if (IS_EDIT) return;
 
-        const textChatCommand = new Instance("TextChatCommand");
+        const textChatCommand = new TextChatCommand();
         textChatCommand.PrimaryAlias = "/" + command.id;
         textChatCommand.SecondaryAlias = "/" + command.aliases[0] || "";
         textChatCommand.Name = command.id + "Command";

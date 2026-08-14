@@ -82,12 +82,12 @@ export class BuildPreviewToolService implements OnInit {
     }
 
     private createPreviewTool() {
-        const tool = new Instance("Tool") as Tool;
+        const tool = new Tool() as Tool;
         tool.Name = PREVIEW_TOOL_NAME;
         tool.CanBeDropped = false;
         tool.RequiresHandle = true;
 
-        const handle = new Instance("Part");
+        const handle = new Part();
         handle.Name = "Handle";
         handle.Size = new Vector3(1.5, 1.5, 1.5);
         handle.Material = Enum.Material.Neon;

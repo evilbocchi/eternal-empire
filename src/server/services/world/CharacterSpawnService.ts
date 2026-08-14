@@ -19,7 +19,7 @@ export default class CharacterSpawnService implements OnStart, OnPlayerAdded {
             return;
         }
 
-        const spawnLocation = new Instance("SpawnLocation");
+        const spawnLocation = new SpawnLocation();
         spawnLocation.Name = "CharacterSpawnService";
         spawnLocation.Size = new Vector3(0.1, 0.1, 0.1);
         spawnLocation.Transparency = 1;

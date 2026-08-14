@@ -58,7 +58,7 @@ export default class Droplet {
     static TheFirstDroplet = Droplet.registerDroplet(
         new Droplet("TheFirstDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Difficulty.TheFirstDifficulty.color!;
                 droplet.Material = Enum.Material.Slate;
@@ -70,7 +70,7 @@ export default class Droplet {
     static FatDroplet = Droplet.registerDroplet(
         new Droplet("FatDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.5, 1.5, 1.5);
                 droplet.Color = Difficulty.TheLowerGap.color!;
                 droplet.Material = Enum.Material.Slate;
@@ -82,7 +82,7 @@ export default class Droplet {
     static ManualDroplet = Droplet.registerDroplet(
         new Droplet("ManualDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Difficulty.Negativity.color!;
                 droplet.Material = Enum.Material.Slate;
@@ -94,7 +94,7 @@ export default class Droplet {
     static HeavyweightDroplet = Droplet.registerDroplet(
         new Droplet("HeavyweightDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.75, 1.75, 1.75);
                 droplet.Color = Difficulty.Negativity.color!;
                 droplet.Material = Enum.Material.Basalt;
@@ -106,7 +106,7 @@ export default class Droplet {
     static GrassDroplet = Droplet.registerDroplet(
         new Droplet("GrassDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Difficulty.Friendliness.color!;
                 droplet.Material = Enum.Material.Grass;
@@ -118,7 +118,7 @@ export default class Droplet {
     static NativeGrassDroplet = Droplet.registerDroplet(
         new Droplet("NativeGrassDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Difficulty.Friendliness.color!;
                 droplet.Material = Enum.Material.Grass;
@@ -130,7 +130,7 @@ export default class Droplet {
     static RustyDroplet = Droplet.registerDroplet(
         new Droplet("RustyDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(0.9, 0.9, 0.9);
                 droplet.Color = Color3.fromRGB(160, 95, 53);
                 droplet.Material = Enum.Material.Slate;
@@ -142,7 +142,7 @@ export default class Droplet {
     static MassiveGrassDroplet = Droplet.registerDroplet(
         new Droplet("MassiveGrassDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(2, 2, 2);
                 droplet.Color = Difficulty.Friendliness.color!;
                 droplet.Material = Enum.Material.Grass;
@@ -154,7 +154,7 @@ export default class Droplet {
     static VibrantDroplet = Droplet.registerDroplet(
         new Droplet("VibrantDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(2, 2, 2);
                 droplet.Color = Difficulty.TrueEase.color!;
                 droplet.Material = Enum.Material.Neon;
@@ -167,7 +167,7 @@ export default class Droplet {
     static CommunismFundsDroplet = Droplet.registerDroplet(
         new Droplet("CommunismFundsDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = new Color3(1, 0, 0);
                 droplet.Material = Enum.Material.Slate;
@@ -179,7 +179,7 @@ export default class Droplet {
     static CommunismPowerDroplet = Droplet.registerDroplet(
         new Droplet("CommunismPowerDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = new Color3(1, 1, 0);
                 droplet.Material = Enum.Material.Slate;
@@ -191,7 +191,7 @@ export default class Droplet {
     static CommunismDroplet = Droplet.registerDroplet(
         new Droplet("CommunismDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Color3.fromRGB(255, 89, 89);
                 droplet.Material = Enum.Material.Slate;
@@ -203,7 +203,7 @@ export default class Droplet {
     static EnergyPoweredDroplet = Droplet.registerDroplet(
         new Droplet("EnergyPoweredDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.25, 1.25, 1.25);
                 droplet.Color = Color3.fromRGB(255, 89, 89);
                 droplet.Material = Enum.Material.Slate;
@@ -215,7 +215,7 @@ export default class Droplet {
     static LegDayDroplet = Droplet.registerDroplet(
         new Droplet("LegDayDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.1, 1.1, 1.1);
                 droplet.Color = Color3.fromRGB(145, 145, 145);
                 droplet.Material = Enum.Material.Slate;
@@ -227,7 +227,7 @@ export default class Droplet {
     static CrystalDroplet = Droplet.registerDroplet(
         new Droplet("CrystalDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(0.8, 0.8, 0.8);
                 droplet.Color = Color3.fromRGB(224, 105, 240);
                 droplet.Material = Enum.Material.Ice;
@@ -239,7 +239,7 @@ export default class Droplet {
     static LiquidFundsDroplet = Droplet.registerDroplet(
         new Droplet("LiquidFundsDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.25, 1.25, 1.25);
                 droplet.Color = Difficulty.FelixTheDA.color!;
                 droplet.Material = Enum.Material.Basalt;
@@ -251,7 +251,7 @@ export default class Droplet {
     static LiquidPowerDroplet = Droplet.registerDroplet(
         new Droplet("LiquidPowerDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.25, 1.25, 1.25);
                 droplet.Color = Color3.fromRGB(255, 163, 89);
                 droplet.Material = Enum.Material.Basalt;
@@ -263,7 +263,7 @@ export default class Droplet {
     static RapidDroplet = Droplet.registerDroplet(
         new Droplet("RapidDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(0.9, 0.9, 0.9);
                 droplet.Color = Difficulty.Exist.color!;
                 droplet.Material = Enum.Material.Slate;
@@ -275,7 +275,7 @@ export default class Droplet {
     static RustyAmethystDroplet = Droplet.registerDroplet(
         new Droplet("RustyAmethystDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Difficulty.ReversedPeripherality.color!;
                 droplet.Material = Enum.Material.Slate;
@@ -287,7 +287,7 @@ export default class Droplet {
     static AmethystDroplet = Droplet.registerDroplet(
         new Droplet("AmethystDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Difficulty.ReversedPeripherality.color!;
                 droplet.Material = Enum.Material.Metal;
@@ -299,7 +299,7 @@ export default class Droplet {
     static Char = Droplet.registerDroplet(
         new Droplet("Char")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = new Color3();
                 droplet.Material = Enum.Material.Slate;
@@ -311,7 +311,7 @@ export default class Droplet {
     static LiquiderFundsDroplet = Droplet.registerDroplet(
         new Droplet("LiquiderFundsDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.25, 1.25, 1.25);
                 droplet.Color = Color3.fromRGB(255, 166, 0);
                 droplet.Material = Enum.Material.Basalt;
@@ -323,7 +323,7 @@ export default class Droplet {
     static LiquiderPowerDroplet = Droplet.registerDroplet(
         new Droplet("LiquiderPowerDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.25, 1.25, 1.25);
                 droplet.Color = Color3.fromRGB(255, 130, 28);
                 droplet.Material = Enum.Material.Basalt;
@@ -335,7 +335,7 @@ export default class Droplet {
     static VitalizedDroplet = Droplet.registerDroplet(
         new Droplet("VitalizedDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.2, 1.2, 1.2);
                 droplet.Color = Difficulty.Restful.color!;
                 droplet.Material = Enum.Material.Glass;
@@ -348,7 +348,7 @@ export default class Droplet {
     static DepressingDroplet = Droplet.registerDroplet(
         new Droplet("DepressingDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Difficulty.Ifinity.color!;
                 droplet.Material = Enum.Material.Basalt;
@@ -360,7 +360,7 @@ export default class Droplet {
     static FundsCompactDroplet = Droplet.registerDroplet(
         new Droplet("FundsCompactDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.25, 1.25, 1.25);
                 droplet.Color = Color3.fromRGB(0, 255, 0);
                 droplet.Material = Enum.Material.Glass;
@@ -372,7 +372,7 @@ export default class Droplet {
     static PowerCompactDroplet = Droplet.registerDroplet(
         new Droplet("PowerCompactDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.25, 1.25, 1.25);
                 droplet.Color = Color3.fromRGB(255, 163, 89);
                 droplet.Material = Enum.Material.Glass;
@@ -384,7 +384,7 @@ export default class Droplet {
     static PurifiersDroplet = Droplet.registerDroplet(
         new Droplet("PurifiersDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.25, 1.25, 1.25);
                 droplet.Color = Color3.fromRGB(255, 138, 255);
                 droplet.Material = Enum.Material.Slate;
@@ -396,7 +396,7 @@ export default class Droplet {
     static ManualV2Droplet = Droplet.registerDroplet(
         new Droplet("ManualV2Droplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Difficulty.Millisecondless.color!;
                 droplet.Material = Enum.Material.Slate;
@@ -408,7 +408,7 @@ export default class Droplet {
     static LiquidestFundsDroplet = Droplet.registerDroplet(
         new Droplet("LiquidestFundsDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.25, 1.25, 1.25);
                 droplet.Color = Color3.fromRGB(255, 135, 235);
                 droplet.Material = Enum.Material.Basalt;
@@ -420,7 +420,7 @@ export default class Droplet {
     static LiquidestPowerDroplet = Droplet.registerDroplet(
         new Droplet("LiquidestPowerDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.25, 1.25, 1.25);
                 droplet.Color = Color3.fromRGB(255, 51, 222);
                 droplet.Material = Enum.Material.Basalt;
@@ -432,7 +432,7 @@ export default class Droplet {
     static SpatialDroplet = Droplet.registerDroplet(
         new Droplet("SpatialDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Difficulty.Astronomical.color!;
                 droplet.Material = Enum.Material.Basalt;
@@ -444,7 +444,7 @@ export default class Droplet {
     static HydratingDroplet = Droplet.registerDroplet(
         new Droplet("HydratingDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.25, 1.25, 1.25);
                 droplet.Color = Difficulty.Win.color!;
                 droplet.Material = Enum.Material.Basalt;
@@ -457,7 +457,7 @@ export default class Droplet {
     static BasicCoin = Droplet.registerDroplet(
         new Droplet("BasicCoin")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Difficulty.Winsome.color!;
                 droplet.Material = Enum.Material.Ice;
@@ -469,7 +469,7 @@ export default class Droplet {
     static DoubleCoin = Droplet.registerDroplet(
         new Droplet("DoubleCoin")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(0.95, 0.95, 0.95);
                 droplet.Color = Difficulty.Blessing.color!;
                 droplet.Material = Enum.Material.Ice;
@@ -481,7 +481,7 @@ export default class Droplet {
     static QuadrupleCoin = Droplet.registerDroplet(
         new Droplet("QuadrupleCoin")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(0.9, 0.9, 0.9);
                 droplet.Color = Difficulty.JustAir.color!;
                 droplet.Material = Enum.Material.Ice;
@@ -493,7 +493,7 @@ export default class Droplet {
     static SkillDroplet = Droplet.registerDroplet(
         new Droplet("SkillDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(0.9, 0.9, 0.9);
                 droplet.Color = Difficulty.Blessing.color!;
                 droplet.Material = Enum.Material.Slate;
@@ -505,7 +505,7 @@ export default class Droplet {
     static ClassicDroplet = Droplet.registerDroplet(
         new Droplet("ClassicDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(0.96, 0.96, 0.96);
                 droplet.Color = Difficulty.Vintage.color!;
                 droplet.Material = Enum.Material.Basalt;
@@ -517,7 +517,7 @@ export default class Droplet {
     static LunaryDroplet = Droplet.registerDroplet(
         new Droplet("LunaryDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Difficulty.Vintage.color!;
                 droplet.Material = Enum.Material.Glass;
@@ -529,7 +529,7 @@ export default class Droplet {
     static SkillerDroplet = Droplet.registerDroplet(
         new Droplet("SkillerDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(0.875, 0.875, 0.875);
                 droplet.Color = Difficulty.Walkthrough.color!;
                 droplet.Material = Enum.Material.Slate;
@@ -541,7 +541,7 @@ export default class Droplet {
     static HappyDroplet = Droplet.registerDroplet(
         new Droplet("HappyDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Difficulty.Happylike.color!;
                 droplet.Material = Enum.Material.Glass;
@@ -553,7 +553,7 @@ export default class Droplet {
     static SolarDroplet = Droplet.registerDroplet(
         new Droplet("SolarDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Difficulty.Walkthrough.color!;
                 droplet.Material = Enum.Material.Glass;
@@ -565,7 +565,7 @@ export default class Droplet {
     static OctupleCoin = Droplet.registerDroplet(
         new Droplet("OctupleCoin")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(0.9, 0.9, 0.9);
                 droplet.Color = Difficulty.AutomaticJoyful.color!;
                 droplet.Material = Enum.Material.Ice;
@@ -577,7 +577,7 @@ export default class Droplet {
     static SkillestDroplet = Droplet.registerDroplet(
         new Droplet("SkillestDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(0.875, 0.875, 0.875);
                 droplet.Color = Difficulty.Unlosable.color!;
                 droplet.Material = Enum.Material.Slate;
@@ -589,7 +589,7 @@ export default class Droplet {
     static LiquidesterFundsDroplet = Droplet.registerDroplet(
         new Droplet("LiquidesterFundsDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.25, 1.25, 1.25);
                 droplet.Color = Color3.fromRGB(252, 105, 230);
                 droplet.Material = Enum.Material.Cardboard;
@@ -601,7 +601,7 @@ export default class Droplet {
     static LiquidesterPowerDroplet = Droplet.registerDroplet(
         new Droplet("LiquidesterPowerDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.25, 1.25, 1.25);
                 droplet.Color = Color3.fromRGB(255, 5, 214);
                 droplet.Material = Enum.Material.Cardboard;
@@ -613,7 +613,7 @@ export default class Droplet {
     static LiquidesterBitcoinDroplet = Droplet.registerDroplet(
         new Droplet("LiquidesterBitcoinDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.25, 1.25, 1.25);
                 droplet.Color = Color3.fromRGB(71, 5, 255);
                 droplet.Material = Enum.Material.Cardboard;
@@ -625,7 +625,7 @@ export default class Droplet {
     static SexdecupleCoin = Droplet.registerDroplet(
         new Droplet("SexdecupleCoin")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(0.91, 0.91, 0.91);
                 droplet.Color = Difficulty.Unlosable.color!;
                 droplet.Material = Enum.Material.Ice;
@@ -637,7 +637,7 @@ export default class Droplet {
     static HandCrankedCoin = Droplet.registerDroplet(
         new Droplet("HandCrankedCoin")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(0.91, 0.91, 0.91);
                 droplet.Color = Difficulty.Frivolous.color!;
                 droplet.Material = Enum.Material.Ice;
@@ -662,7 +662,7 @@ export default class Droplet {
     static ShatteredDroplet = Droplet.registerDroplet(
         new Droplet("ShatteredDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Color3.fromRGB(113, 16, 171);
                 droplet.Material = Enum.Material.Slate;
@@ -674,7 +674,7 @@ export default class Droplet {
     static TotalityDroplet = Droplet.registerDroplet(
         new Droplet("TotalityDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(2, 2, 2);
                 droplet.Color = Difficulty.Spontaneous.color!;
                 droplet.Material = Enum.Material.Neon;
@@ -688,12 +688,12 @@ export default class Droplet {
     static LuckyDroplet = Droplet.registerDroplet(
         new Droplet("LuckyDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Color3.fromRGB(140, 255, 245);
                 droplet.Material = Enum.Material.Neon;
 
-                const light = new Instance("PointLight");
+                const light = new PointLight();
                 light.Color = new Color3(0.5, 1, 0.87);
                 light.Shadows = false;
                 light.Range = 10;
@@ -708,7 +708,7 @@ export default class Droplet {
     static MovementDroplet = Droplet.registerDroplet(
         new Droplet("MovementDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.4, 1.4, 1.4);
                 droplet.Color = Difficulty.DoSomething.color!;
                 droplet.Material = Enum.Material.Slate;
@@ -720,7 +720,7 @@ export default class Droplet {
     static BalloonDroplet = Droplet.registerDroplet(
         new Droplet("BalloonDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(0.6, 0.6, 0.6);
                 droplet.Color = Difficulty.DoSomething.color!;
                 droplet.Material = Enum.Material.Glass;
@@ -732,7 +732,7 @@ export default class Droplet {
     static StuddedDroplet = Droplet.registerDroplet(
         new Droplet("StuddedDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1.2, 1.2, 1.2);
                 droplet.Color = Difficulty.AutomaticJoyful.color!;
                 droplet.Material = Enum.Material.Slate;
@@ -745,7 +745,7 @@ export default class Droplet {
     static PlacidDroplet = Droplet.registerDroplet(
         new Droplet("PlacidDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Difficulty.Placid.color!;
                 droplet.Material = Enum.Material.Slate;
@@ -757,7 +757,7 @@ export default class Droplet {
     static UnrealDroplet = Droplet.registerDroplet(
         new Droplet("UnrealDroplet")
             .setModel(() => {
-                const droplet = new Instance("Part");
+                const droplet = new Part();
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Difficulty.Unreal.color!;
                 droplet.Material = Enum.Material.Slate;
@@ -947,7 +947,7 @@ export default class Droplet {
                     dropletModel.Anchored = true;
                     dropletModel.Transparency = 1;
                     Debris.AddItem(dropletModel, 6);
-                    const explosion = new Instance("Explosion");
+                    const explosion = new Explosion();
                     explosion.ExplosionType = Enum.ExplosionType.NoCraters;
                     explosion.DestroyJointRadiusPercent = 0;
                     explosion.BlastRadius = 0;

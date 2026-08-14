@@ -21,7 +21,7 @@ namespace LoadingScreen {
             if (!player) return;
 
             const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
-            guiContainer = new Instance("ScreenGui") as ScreenGui;
+            guiContainer = new ScreenGui() as ScreenGui;
             guiContainer.Name = "LoadingScreen";
             guiContainer.ResetOnSpawn = false;
             guiContainer.IgnoreGuiInset = true;
@@ -29,7 +29,7 @@ namespace LoadingScreen {
             guiContainer.Parent = playerGui;
         }
 
-        backdrop = new Instance("ImageLabel");
+        backdrop = new ImageLabel();
         backdrop.AnchorPoint = new Vector2(0.5, 0.5);
         backdrop.Size = new UDim2(1, 0, 1, 0);
         backdrop.SizeConstraint = Enum.SizeConstraint.RelativeXX;
@@ -41,14 +41,14 @@ namespace LoadingScreen {
         backdrop.ImageTransparency = 0.925;
         backdrop.ScaleType = Enum.ScaleType.Fit;
         // Add UICorner for animating roundness
-        const backdropCorner = new Instance("UICorner");
+        const backdropCorner = new UICorner();
         backdropCorner.CornerRadius = new UDim(0, 0); // Start square
         backdropCorner.Name = "BackdropCorner";
         backdropCorner.Parent = backdrop;
         backdrop.Parent = guiContainer;
 
         // Clock Frame (center)
-        clockFrame = new Instance("Frame");
+        clockFrame = new Frame();
         clockFrame.AnchorPoint = new Vector2(0.5, 0.5);
         clockFrame.Position = new UDim2(0.5, 0, 0.5, 0);
         clockFrame.Size = new UDim2(0, 192, 0, 192);
@@ -57,7 +57,7 @@ namespace LoadingScreen {
         clockFrame.Parent = guiContainer;
 
         // Pulse Frame (center, for glow effect)
-        pulseFrame = new Instance("Frame");
+        pulseFrame = new Frame();
         pulseFrame.AnchorPoint = new Vector2(0.5, 0.5);
         pulseFrame.Position = new UDim2(0.5, 0, 0.5, 0);
         pulseFrame.Size = new UDim2(0, 32, 0, 32);
@@ -66,12 +66,12 @@ namespace LoadingScreen {
         pulseFrame.BorderSizePixel = 0;
         pulseFrame.ZIndex = 6;
         pulseFrame.Parent = clockFrame;
-        const uiCorner = new Instance("UICorner");
+        const uiCorner = new UICorner();
         uiCorner.CornerRadius = new UDim(1, 0);
         uiCorner.Parent = pulseFrame;
 
         // Short hand (hour)
-        shortHand = new Instance("ImageLabel");
+        shortHand = new ImageLabel();
         shortHand.AnchorPoint = new Vector2(0.5, 0.5); // bottom center
         shortHand.Position = new UDim2(0.5, 0, 0.5, 0);
         shortHand.Size = new UDim2(0, 80, 0, 80);
@@ -82,7 +82,7 @@ namespace LoadingScreen {
         shortHand.Parent = clockFrame;
 
         // Long hand (minute)
-        longHand = new Instance("ImageLabel");
+        longHand = new ImageLabel();
         longHand.AnchorPoint = new Vector2(0.5, 0.5); // bottom center
         longHand.Position = new UDim2(0.5, 0, 0.5, 0);
         longHand.Size = new UDim2(0, 96, 0, 96);
@@ -93,7 +93,7 @@ namespace LoadingScreen {
         longHand.Parent = clockFrame;
 
         // Label
-        label = new Instance("TextLabel");
+        label = new TextLabel();
         label.AnchorPoint = new Vector2(0.5, 0.5);
         label.BackgroundTransparency = 1;
         label.Position = new UDim2(0.5, 0, 0.5, 100);

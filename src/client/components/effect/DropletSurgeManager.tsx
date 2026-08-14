@@ -10,7 +10,7 @@ export default function DropletSurgeManager() {
             if (droplet === undefined) return;
 
             // Visual effect for surged droplet
-            const light = new Instance("PointLight");
+            const light = new PointLight();
             light.Color = Color3.fromRGB(255, 255, 255);
             light.Brightness = 10;
             light.Range = 3;

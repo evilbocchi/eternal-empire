@@ -7,7 +7,7 @@ class EmpireIdOverrideValue extends SingleWorldNode<StringValue> {
     constructor(tag: string) {
         super(tag);
         if (Sandbox.getEnabled()) {
-            const instance = new Instance("StringValue");
+            const instance = new StringValue();
             instance.AddTag(tag);
             instance.Value = Sandbox.getId() ?? "SANDBOX";
             instance.Parent = Workspace;

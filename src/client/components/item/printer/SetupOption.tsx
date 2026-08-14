@@ -29,7 +29,7 @@ export default function SetupOption({
     const onLoad = () => {
         playSound("MagicSprinkle.mp3", undefined, (sound) => {
             sound.PlaybackSpeed = 0.95;
-            const reverb = new Instance("ReverbSoundEffect");
+            const reverb = new ReverbSoundEffect();
             reverb.Parent = sound;
         });
         Packets.loadSetup.toServer(placementId, setupName);

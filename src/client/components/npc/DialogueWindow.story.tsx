@@ -25,17 +25,17 @@ export = CreateReactStory(
         });
 
         useEffect(() => {
-            const model = new Instance("Model");
+            const model = new Model();
             model.Name = props.controls.npcName;
 
-            const head = new Instance("Part");
+            const head = new Part();
             head.Name = "Head";
             head.Shape = Enum.PartType.Ball;
             head.Size = new Vector3(2, 1, 1);
             head.BrickColor = new BrickColor("Light orange");
             head.Parent = model;
 
-            const humanoid = new Instance("Humanoid");
+            const humanoid = new Humanoid();
             humanoid.Parent = model;
 
             model.PrimaryPart = head;

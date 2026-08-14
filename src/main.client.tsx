@@ -6,7 +6,7 @@ import { ReplicatedStorage } from "@rbxts/services";
 import App from "client/components/App";
 import eat from "shared/hamster/eat";
 
-const container = new Instance("Folder");
+const container = new Folder();
 container.Name = "AppContainer";
 container.Parent = ReplicatedStorage;
 const root = createRoot(container);

@@ -40,7 +40,7 @@ export default function performNewBeginningsWakeUp() {
     });
 
     print("performing intro sequence");
-    const screenGui = new Instance("ScreenGui");
+    const screenGui = new ScreenGui();
     screenGui.IgnoreGuiInset = true;
     screenGui.ResetOnSpawn = false;
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
@@ -51,7 +51,7 @@ export default function performNewBeginningsWakeUp() {
         eat(screenGui, "Destroy");
     }
 
-    const blackWindow = new Instance("Frame");
+    const blackWindow = new Frame();
     blackWindow.Size = new UDim2(1, 0, 1, 0);
     blackWindow.BackgroundColor3 = Color3.fromRGB(0, 0, 0);
     blackWindow.BackgroundTransparency = 0;

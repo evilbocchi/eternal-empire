@@ -44,14 +44,14 @@ export interface UpdateInventorySlotOptions {
 }
 
 function createGradient(colorSequence: ColorSequence, parent: Instance) {
-    const gradient = new Instance("UIGradient");
+    const gradient = new UIGradient();
     gradient.Color = colorSequence;
     gradient.Parent = parent;
     return gradient;
 }
 
 function createStroke(parent: GuiObject, color: Color3) {
-    const stroke = new Instance("UIStroke");
+    const stroke = new UIStroke();
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border;
     stroke.Color = color;
     stroke.Thickness = 2;
@@ -72,7 +72,7 @@ export function createInventorySlot(item: Item, options: CreateInventorySlotOpti
 
     const backgroundColor = item.difficulty.color ?? Color3.fromRGB(52, 155, 255);
 
-    const button = new Instance("TextButton");
+    const button = new TextButton();
     button.Name = `InventorySlot_${item.id}`;
     button.BackgroundColor3 = backgroundColor;
     button.BorderColor3 = Color3.fromRGB(0, 0, 0);
@@ -85,7 +85,7 @@ export function createInventorySlot(item: Item, options: CreateInventorySlotOpti
     button.AutoButtonColor = true;
     button.Parent = parent;
 
-    const aspectConstraint = new Instance("UIAspectRatioConstraint");
+    const aspectConstraint = new UIAspectRatioConstraint();
     aspectConstraint.AspectRatio = 1;
     aspectConstraint.AspectType = Enum.AspectType.ScaleWithParentSize;
     aspectConstraint.DominantAxis = Enum.DominantAxis.Height;
@@ -113,7 +113,7 @@ export function createInventorySlot(item: Item, options: CreateInventorySlotOpti
     );
     strokeGradient.Rotation = 35;
 
-    const amountLabel = new Instance("TextLabel");
+    const amountLabel = new TextLabel();
     amountLabel.Name = "AmountLabel";
     amountLabel.Active = true;
     amountLabel.AnchorPoint = new Vector2(0.5, 0.5);
@@ -130,11 +130,11 @@ export function createInventorySlot(item: Item, options: CreateInventorySlotOpti
     amountLabel.TextXAlignment = Enum.TextXAlignment.Right;
     amountLabel.Parent = button;
 
-    const amountStroke = new Instance("UIStroke");
+    const amountStroke = new UIStroke();
     amountStroke.Thickness = 2;
     amountStroke.Parent = amountLabel;
 
-    const reflection = new Instance("ImageLabel");
+    const reflection = new ImageLabel();
     reflection.Name = "Reflection";
     reflection.AnchorPoint = new Vector2(0.5, 0.5);
     reflection.BackgroundTransparency = 1;
@@ -152,7 +152,7 @@ export function createInventorySlot(item: Item, options: CreateInventorySlotOpti
     let imageLabel: ImageLabel | undefined;
 
     if (item.image !== undefined) {
-        imageLabel = new Instance("ImageLabel");
+        imageLabel = new ImageLabel();
         imageLabel.AnchorPoint = new Vector2(0.5, 0.5);
         imageLabel.BackgroundTransparency = 1;
         imageLabel.Image = item.image;
@@ -161,7 +161,7 @@ export function createInventorySlot(item: Item, options: CreateInventorySlotOpti
         imageLabel.ZIndex = 0;
         imageLabel.Parent = button;
     } else {
-        viewportFrame = new Instance("ViewportFrame");
+        viewportFrame = new ViewportFrame();
         viewportFrame.AnchorPoint = new Vector2(0.5, 0.5);
         viewportFrame.BackgroundTransparency = 1;
         viewportFrame.Position = new UDim2(0.5, 0, 0.5, 0);
@@ -171,7 +171,7 @@ export function createInventorySlot(item: Item, options: CreateInventorySlotOpti
         ItemViewport.loadItemIntoViewport(viewportFrame, item.id);
     }
 
-    const overlay = new Instance("ImageLabel");
+    const overlay = new ImageLabel();
     overlay.Name = "Overlay";
     overlay.BackgroundTransparency = 1;
     overlay.Image = getAsset("assets/Vignette.png");

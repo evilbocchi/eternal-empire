@@ -78,7 +78,7 @@ export function spawnItemModel(itemId: string): SpawnedModel {
 }
 
 export function spawnDroplet(template: Droplet): SpawnedDroplet {
-    const dropperModel = new Instance("Model") as Model;
+    const dropperModel = new Model() as Model;
     dropperModel.Name = `TestDropper_${HttpService.GenerateGUID(false)}`;
     dropperModel.Parent = PLACED_ITEMS_FOLDER;
     const dropperInfo = getAllInstanceInfo(dropperModel);
@@ -152,11 +152,11 @@ export function setupTestCondenser() {
 
     Server.empireData.items.worldPlaced.set(placementId, placedItem);
 
-    const model = new Instance("Model") as Model;
+    const model = new Model() as Model;
     model.Name = placementId;
     model.Parent = PLACED_ITEMS_FOLDER;
 
-    const drop = new Instance("Part") as BasePart;
+    const drop = new Part() as BasePart;
     drop.Name = "Drop";
     drop.Size = new Vector3(1, 1, 1);
     drop.Anchored = true;

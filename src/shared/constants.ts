@@ -60,7 +60,7 @@ export const PLACED_ITEMS_FOLDER = (() => {
     const key = "PlacedItems";
     let folder = CAMERA.FindFirstChild(key) as Folder | undefined;
     if (folder === undefined) {
-        folder = new Instance("Folder");
+        folder = new Folder();
         folder.Name = key;
         folder.Parent = CAMERA;
     }

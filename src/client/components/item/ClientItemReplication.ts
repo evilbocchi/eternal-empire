@@ -65,7 +65,7 @@ namespace ClientItemReplication {
         const size = primaryPart.Size;
 
         // Create sparkles
-        const sparkles = new Instance("ParticleEmitter");
+        const sparkles = new ParticleEmitter();
         sparkles.Acceleration = new Vector3(0, 2, 0);
         sparkles.Color = new ColorSequence(item.difficulty.color ?? Color3.fromRGB(255, 255, 255));
         sparkles.Drag = 6;
@@ -97,7 +97,7 @@ namespace ClientItemReplication {
         ]);
         sparkles.ZOffset = 1;
 
-        const container = new Instance("Part");
+        const container = new Part();
         container.Anchored = true;
         container.CanCollide = false;
         container.CanTouch = false;
@@ -115,7 +115,7 @@ namespace ClientItemReplication {
 
         // Create pulse
         // Disabled for performance reasons
-        // const highlight = new Instance("Highlight");
+        // const highlight = new Highlight();
         // highlight.Adornee = model;
         // highlight.FillColor = Color3.fromRGB(255, 255, 255);
         // highlight.FillTransparency = 0.8;

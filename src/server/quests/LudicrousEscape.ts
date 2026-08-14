@@ -379,7 +379,7 @@ export = new Quest(script.Name)
                     model.Parent = Workspace;
                 });
                 const simpulSadConn = simpulSad.finished.connect(() => {
-                    const part = new Instance("Part");
+                    const part = new Part();
                     part.Transparency = 1;
                     part.Anchored = true;
                     part.CanCollide = false;

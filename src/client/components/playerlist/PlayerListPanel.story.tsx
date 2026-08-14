@@ -125,7 +125,7 @@ export = CreateReactStory(
                 setRendered(true);
             }
 
-            const driver = new Instance("NumberValue");
+            const driver = new NumberValue();
             driver.Value = progressRef.current;
 
             const tween = TweenService.Create(

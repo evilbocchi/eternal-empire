@@ -40,7 +40,7 @@ export const SOUND_EFFECTS_GROUP = (() => {
     const key = "SoundEffects";
     let group = SoundService.FindFirstChild(key) as SoundGroup | undefined;
     if (group === undefined) {
-        group = new Instance("SoundGroup");
+        group = new SoundGroup();
         group.Name = key;
         group.Parent = SoundService;
     }
@@ -62,7 +62,7 @@ export function getSound(soundPath: SoundAssetSubPath) {
     if (cached !== undefined) {
         return cached;
     }
-    const sound = new Instance("Sound");
+    const sound = new Sound();
     sound.Name = fullPath;
     sound.SoundId = assets[fullPath];
     sound.SoundGroup = SOUND_EFFECTS_GROUP;

@@ -13,23 +13,23 @@ describe("npc interaction gating", () => {
         const existingTemplate = npcFolder!.FindFirstChild("TestNPC");
         existingTemplate?.Destroy();
 
-        const model = new Instance("Model") as Model;
+        const model = new Model() as Model;
         model.Name = "TestNPC";
         model.Parent = npcFolder!;
 
-        const root = new Instance("Part") as BasePart;
+        const root = new Part() as BasePart;
         root.Name = "HumanoidRootPart";
         root.Size = new Vector3(2, 2, 2);
         root.CanCollide = false;
         root.Parent = model;
         model.PrimaryPart = root;
 
-        const head = new Instance("Part") as BasePart;
+        const head = new Part() as BasePart;
         head.Name = "Head";
         head.Size = new Vector3(2, 1, 1);
         head.Parent = model;
 
-        const humanoid = new Instance("Humanoid") as Humanoid;
+        const humanoid = new Humanoid() as Humanoid;
         humanoid.Parent = model;
 
         npc = new NPC("TestNPC");

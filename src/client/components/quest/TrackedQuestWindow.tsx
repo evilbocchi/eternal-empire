@@ -96,7 +96,7 @@ export default function TrackedQuestWindow() {
     }, [currentQuest, trackerBeam]);
 
     useEffect(() => {
-        const beam = new Instance("Beam");
+        const beam = new Beam();
         beam.Brightness = 1;
         beam.LightEmission = 0.25;
         beam.LightInfluence = 0;
@@ -117,7 +117,7 @@ export default function TrackedQuestWindow() {
         beam.FaceCamera = true;
         beam.Enabled = false;
 
-        const beamContainer = new Instance("Part");
+        const beamContainer = new Part();
         beamContainer.Transparency = 1;
         beamContainer.CanCollide = false;
         beamContainer.CanTouch = false;
@@ -129,7 +129,7 @@ export default function TrackedQuestWindow() {
         let dummyCharacter: Part | undefined;
         let cleanup: () => void;
         if (IS_EDIT) {
-            dummyCharacter = new Instance("Part");
+            dummyCharacter = new Part();
             dummyCharacter.Anchored = true;
             dummyCharacter.CanCollide = false;
             dummyCharacter.CanTouch = false;

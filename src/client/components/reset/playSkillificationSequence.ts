@@ -15,7 +15,7 @@ declare global {
 
 function createDramaticIntro(): ScreenGui {
     // Create the black screen overlay
-    const screenGui = new Instance("ScreenGui");
+    const screenGui = new ScreenGui();
     screenGui.Name = "ResetDramaticIntro";
     screenGui.DisplayOrder = 1000; // High display order to ensure it's on top
     screenGui.IgnoreGuiInset = true;
@@ -24,7 +24,7 @@ function createDramaticIntro(): ScreenGui {
     screenGui.Parent = PLAYER_GUI;
 
     // Black background frame
-    const blackFrame = new Instance("Frame");
+    const blackFrame = new Frame();
     blackFrame.Name = "BlackOverlay";
     blackFrame.Size = new UDim2(1, 0, 1, 0);
     blackFrame.Position = new UDim2(0, 0, 0, 0);
@@ -35,7 +35,7 @@ function createDramaticIntro(): ScreenGui {
     blackFrame.Parent = screenGui;
 
     // Dramatic text label - start with empty text
-    const textLabel = new Instance("TextLabel");
+    const textLabel = new TextLabel();
     textLabel.Name = "DramaticText";
     textLabel.AnchorPoint = new Vector2(0.5, 0.5);
     textLabel.Position = new UDim2(0.5, 0, 0.5, 0);
@@ -51,7 +51,7 @@ function createDramaticIntro(): ScreenGui {
     textLabel.TextTransparency = 0; // Make visible since we'll control character appearance
     textLabel.Parent = screenGui;
 
-    const textStroke = new Instance("UIStroke");
+    const textStroke = new UIStroke();
     textStroke.Color = new Color3(0, 0, 0);
     textStroke.Thickness = 3;
     textStroke.Transparency = 0;
@@ -73,7 +73,7 @@ async function animateTextCharacterByCharacter(textLabel: TextLabel, fullText: s
     // Create individual character labels
     for (let i = 0; i < fullText.size(); i++) {
         const char = fullText.sub(i + 1, i + 1);
-        const charLabel = new Instance("TextLabel");
+        const charLabel = new TextLabel();
         charLabel.Name = `Char${i}`;
         charLabel.BackgroundTransparency = 1;
         charLabel.Font = textLabel.Font;
@@ -86,7 +86,7 @@ async function animateTextCharacterByCharacter(textLabel: TextLabel, fullText: s
         charLabel.TextTransparency = 1; // Start invisible
         charLabel.ZIndex = textLabel.ZIndex;
 
-        const stroke = new Instance("UIStroke");
+        const stroke = new UIStroke();
         stroke.Color = new Color3(0, 0, 0);
         stroke.Thickness = 3;
         stroke.Transparency = 1;

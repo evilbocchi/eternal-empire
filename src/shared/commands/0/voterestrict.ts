@@ -48,7 +48,7 @@ export = new Command(script.Name)
             }
             const requirement = math.round((playerCount * 2) / 3);
             Server.ChatHook.sendServerMessage(`${votes}/${requirement} votes needed.`, "color:138,255,138");
-            const voteToken = new Instance("NumberValue");
+            const voteToken = new NumberValue();
             voteToken.Value = tick();
             voteToken.Name = tostring(userId);
             voteToken.Parent = sender;

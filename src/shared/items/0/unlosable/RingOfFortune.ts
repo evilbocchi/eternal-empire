@@ -40,7 +40,7 @@ export = new Item(script.Name)
                 if (debounce === true) return;
                 debounce = true;
                 task.delay(1, () => (debounce = false));
-                const explosion = new Instance("Explosion");
+                const explosion = new Explosion();
                 explosion.ExplosionType = Enum.ExplosionType.NoCraters;
                 explosion.BlastRadius = 50;
                 explosion.BlastPressure = 2500000;

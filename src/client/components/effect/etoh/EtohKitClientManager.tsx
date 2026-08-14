@@ -79,7 +79,7 @@ export default function EtohKitClientManager() {
                     }
                     torso.CFrame = cframeSet.CFrame.mul(CFrame.Angles(0, math.pi, 0)).mul(offsetFromPart);
 
-                    const sound = new Instance("Sound");
+                    const sound = new Sound();
                     sound.SoundId = "rbxasset://sounds//electronicpingshort.wav";
                     sound.Volume = 0.3;
 

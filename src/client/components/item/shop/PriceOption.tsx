@@ -23,7 +23,7 @@ const OPTION_BETWEEN_PADDING = 4;
 const OPTION_X_PADDING = 10;
 const OPTION_Y_PADDING = 1;
 
-const GET_TEXT_BOUNDS_PARAMS = new Instance("GetTextBoundsParams");
+const GET_TEXT_BOUNDS_PARAMS = new GetTextBoundsParams();
 GET_TEXT_BOUNDS_PARAMS.Font = RobotoSlabHeavy;
 
 function PriceOption({

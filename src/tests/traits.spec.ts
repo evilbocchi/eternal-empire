@@ -640,7 +640,7 @@ describe("Condenser", () => {
         for (const [droplet] of Droplet.SPAWNED_DROPLETS) beforeDroplets.add(droplet);
 
         const raw = droplet.value;
-        const inputDroplet = new Instance("Part") as BasePart;
+        const inputDroplet = new Part() as BasePart;
         inputDroplet.Name = "InputDroplet";
         inputDroplet.Parent = Workspace;
         const inputInfo = getAllInstanceInfo(inputDroplet);
@@ -676,7 +676,7 @@ describe("Condenser", () => {
     it("ignores condensed droplets fed back into the same condenser", () => {
         const { furnaceProcessed, droplet, cleanup } = setupTestCondenser();
         const raw = droplet.value;
-        const inputDroplet = new Instance("Part") as BasePart;
+        const inputDroplet = new Part() as BasePart;
         inputDroplet.Name = "InputDroplet";
         inputDroplet.Parent = Workspace;
         const inputInfo = getAllInstanceInfo(inputDroplet);

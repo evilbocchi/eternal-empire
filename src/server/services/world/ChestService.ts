@@ -332,7 +332,7 @@ export default class ChestService implements OnInit, OnStart {
             chestModel.Name = `Chest_${i++}`;
             chestModel.Parent = Workspace;
 
-            const prompt = new Instance("ProximityPrompt");
+            const prompt = new ProximityPrompt();
             prompt.AddTag("ProximityPrompt");
             prompt.Style = Enum.ProximityPromptStyle.Custom;
             prompt.ActionText = "Open";

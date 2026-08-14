@@ -10,7 +10,7 @@ export default function createEtohConveyor(conveyor: BasePart) {
         conveyor.AssemblyLinearVelocity = conveyor.CFrame.LookVector.mul(speed);
         for (const c of conveyor.GetChildren()) {
             if (!c.IsA("Attachment")) continue;
-            const beam = new Instance("Beam");
+            const beam = new Beam();
             beam.TextureSpeed = speed / beam.TextureLength;
         }
     };

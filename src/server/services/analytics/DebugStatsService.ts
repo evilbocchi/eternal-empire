@@ -63,7 +63,7 @@ export default class DebugStatsService implements OnInit, OnStart {
         });
 
         if (IS_STUDIO) {
-            const remote = new Instance("RemoteEvent");
+            const remote = new RemoteEvent();
             remote.Name = "LiveRemote";
             remote.Parent = Workspace;
             eat(remote, "Destroy");

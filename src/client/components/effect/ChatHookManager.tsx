@@ -66,13 +66,13 @@ export default function ChatHookManager() {
                     text = `<font color="#${color.ToHex()}">${text}</font>`;
                 }
 
-                const overrideProperties = new Instance("TextChatMessageProperties");
+                const overrideProperties = new TextChatMessageProperties();
                 if (color !== undefined) {
                     overrideProperties.Text = text;
                 }
                 return overrideProperties;
             };
-            const noopHandler: typeof onMessageAdded = () => new Instance("TextChatMessageProperties");
+            const noopHandler: typeof onMessageAdded = () => new TextChatMessageProperties();
 
             const messageReceivedConnection = channel.MessageReceived.Connect((incomingMessage) => {
                 if (incomingMessage.TextSource?.UserId !== LOCAL_PLAYER?.UserId) {
