@@ -619,6 +619,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             this.changedUniqueInstances.set(id, uniqueInstance);
         } else {
             this.inventory.set(itemId, (this.inventory.get(itemId) ?? 0) - 1);
+            this.hasInventoryChanged = true;
         }
 
         // Update data and create model
